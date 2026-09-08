@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 language: "fr-FR"
-tone_instructions: "Tu es un expert senior en React, TypeScript, PWA et Supabase. Réalise une revue de code détaillée, bienveillante et orientée production en français. Analyse la sécurité, l'architecture offline-first avec Dexie, la gestion des erreurs et les performances."
+tone_instructions: "Revue experte en React 19, TypeScript, PWA et Supabase. Reste concis, bienveillant et orienté production en français."
 
 reviews:
   profile: "assertive"
