@@ -59,7 +59,7 @@ export const ReportPhotoCapture: React.FC<ReportPhotoCaptureProps> = ({
 
     setIsCompressing(true);
     try {
-      const newPhotos = await Promise.all(
+      const results = await Promise.allSettled(
         files.map(async (file) => {
           const base64 = await compressImage(file);
           return {
@@ -71,12 +71,25 @@ export const ReportPhotoCapture: React.FC<ReportPhotoCaptureProps> = ({
           };
         })
       );
-      newPhotos.forEach(p => onAddPhoto(p));
+      results.forEach(r => {
+        if (r.status === 'fulfilled') {
+          onAddPhoto(r.value);
+        }
+      });
     } finally {
       setIsCompressing(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
+
+  React.useEffect(() => {
+    if (!lightboxPhoto) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxPhoto(null);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [lightboxPhoto]);
 
   const formattedDate = new Date(reportDate + 'T12:00:00').toLocaleDateString('fr-FR', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
@@ -195,14 +208,14 @@ export const ReportPhotoCapture: React.FC<ReportPhotoCaptureProps> = ({
           </p>
         )}
 
-        {/* Hidden file input — accepts multiple, camera on mobile */}
+        {/* Hidden file input — accepts multiple */}
         <input
+          id="report-photo-input"
           aria-label="Sélectionner une ou plusieurs photos du rapport"
           ref={fileInputRef}
           type="file"
           accept="image/*"
           multiple
-          capture="environment"
           onChange={handleFileSelect}
           style={{ display: 'none' }}
         />

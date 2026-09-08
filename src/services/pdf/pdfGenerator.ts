@@ -258,19 +258,26 @@ export function generateDailyReportPDF(
       doc.setFontSize(14);
       doc.text(`Annexe Photo ${index + 1} / ${photos.length}`, 14, 16);
       
-      // Render the image
-      // jsPDF supports base64 directly (JPEG/PNG natively, WEBP might have varying support, but standard jsPDF 2.x supports data URIs)
       const margin = 14;
       try {
-        // Find dimensions that fit on the page (leaving margin)
-        // A4 is 210 x 297mm
         const maxW = pageWidth - margin * 2;
-        const maxH = 297 - 25 - margin * 2; // Subtract header and bottom margin
-        
-        // As a rough estimate, just stretch to width while keeping somewhat a generic aspect ratio or passing just width and letting it scale if possible.
-        // Actually, without knowing the exact aspect ratio of the image from base64 instantly, we can provide just max properties, but jsPDF requires w/h or it stretches.
-        // A standard photo from phone is usually 4:3 or 16:9.
-        doc.addImage(photo.base64, 'WEBP', margin, 35, maxW, maxH, undefined, 'FAST');
+        const maxH = 297 - 35 - 20; // Leave space for header and footer
+
+        let drawW = maxW;
+        let drawH = maxH;
+        try {
+          const props = doc.getImageProperties(photo.base64);
+          if (props && props.width && props.height) {
+            const ratio = Math.min(maxW / props.width, maxH / props.height);
+            drawW = props.width * ratio;
+            drawH = props.height * ratio;
+          }
+        } catch {
+          // Fallback if properties extraction fails
+        }
+
+        const drawX = margin + (maxW - drawW) / 2;
+        doc.addImage(photo.base64, 'WEBP', drawX, 35, drawW, drawH, `photo_${index}`, 'FAST');
         
         // Subtitle
         doc.setTextColor(100, 100, 100);

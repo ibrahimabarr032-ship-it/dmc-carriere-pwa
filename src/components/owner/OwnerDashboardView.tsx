@@ -408,10 +408,10 @@ export const OwnerDashboardView: React.FC = () => {
               <div className="clean-card" style={{ padding: '1.15rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ec4899', marginBottom: '0.5rem' }}>
                   <Truck size={17} />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>14 Roues Semi</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Semi-Remorque (40t+)</span>
                 </div>
                 <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#0f172a' }}>
-                  {getTruckCount('14 Roues')}
+                  {getTruckCount('Semi') || getTruckCount('Remorque') || getTruckCount('14 Roues')}
                 </div>
               </div>
 

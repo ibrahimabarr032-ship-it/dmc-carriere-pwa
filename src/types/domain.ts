@@ -95,7 +95,7 @@ export interface AuditLogEntry {
   userId: string;
   userName: string;
   userRole: UserRole;
-  action: 'CREATE_LOADING' | 'CREATE_EXPENSE' | 'DAILY_CLOSURE' | 'PRICE_UPDATE' | 'TAX_UPDATE' | 'USER_LOGIN';
+  action: 'CREATE_LOADING' | 'CREATE_EXPENSE' | 'DAILY_CLOSURE' | 'PRICE_UPDATE' | 'TAX_UPDATE' | 'USER_LOGIN' | 'CREATE_USER' | 'CREATE_TRUCK' | 'UPDATE_TRUCK' | 'DELETE_TRUCK';
   entityName: string;
   entityId: string;
   details: Record<string, unknown>;

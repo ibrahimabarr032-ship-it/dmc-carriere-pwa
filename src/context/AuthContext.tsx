@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Record audit entry
       await db.auditLogs.add({
-        id: 'log_' + Date.now(),
+        id: 'log_' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36).slice(2)),
         userId: user.id,
         userName: user.fullName,
         userRole: user.role,

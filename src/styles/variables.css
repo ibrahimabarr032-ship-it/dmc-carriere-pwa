@@ -29,6 +29,7 @@
   --gold-200: #fde68a;
   --gold-500: #d97706;
   --gold-600: #b45309;
+  --gold-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
 
   /* Pastel Tag & Metric Tile Palettes */
   --tag-green-bg: #dcfce7;

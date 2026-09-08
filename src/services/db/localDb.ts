@@ -59,6 +59,7 @@ export async function clearLocalDatabase(): Promise<void> {
     db.loadings.clear(),
     db.expenses.clear(),
     db.dailyClosures.clear(),
+    db.dailyReports.clear(),
     db.auditLogs.clear(),
     db.syncQueue.clear()
   ]);

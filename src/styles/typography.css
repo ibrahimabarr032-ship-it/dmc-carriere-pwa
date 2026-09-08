@@ -1,11 +1,11 @@
 body, input, button, select, textarea {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4, .font-heading, .btn-fat {
-  font-family: 'Outfit', 'Inter', sans-serif;
+  font-family: Outfit, Inter, sans-serif;
   letter-spacing: -0.02em;
 }
 

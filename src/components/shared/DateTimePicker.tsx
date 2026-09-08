@@ -13,24 +13,32 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
   label = 'Date & Heure du passage',
   maxDate
 }) => {
-  const today = new Date().toISOString().split('T')[0];
-  const max = maxDate || today;
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  const now = new Date();
+  const localToday = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const max = maxDate || localToday;
 
-  // Split ISO into date and time parts for the two inputs
-  const dateVal = value ? value.substring(0, 10) : today;
-  const timeVal = value ? value.substring(11, 16) : new Date().toTimeString().substring(0, 5);
+  const dateObj = value ? new Date(value) : now;
+  const dateVal = `${dateObj.getFullYear()}-${pad(dateObj.getMonth() + 1)}-${pad(dateObj.getDate())}`;
+  const timeVal = `${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`;
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDate = e.target.value;
-    onChange(`${newDate}T${timeVal}:00.000Z`);
+    const [y, m, d] = newDate.split('-').map(Number);
+    const [hh, mm] = timeVal.split(':').map(Number);
+    const updated = new Date(y, m - 1, d, hh, mm);
+    onChange(updated.toISOString());
   };
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = e.target.value;
-    onChange(`${dateVal}T${newTime}:00.000Z`);
+    const [y, m, d] = dateVal.split('-').map(Number);
+    const [hh, mm] = newTime.split(':').map(Number);
+    const updated = new Date(y, m - 1, d, hh, mm);
+    onChange(updated.toISOString());
   };
 
-  const isModified = dateVal !== today;
+  const isModified = dateVal !== localToday;
 
   return (
     <div style={{ marginBottom: '0.75rem' }}>

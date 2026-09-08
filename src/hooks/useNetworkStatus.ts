@@ -48,17 +48,25 @@ export function useNetworkStatus() {
     try {
       const result = await syncAllDataWithSupabase();
       
-      if (result.success) {
+      if (result.success && result.syncedIds) {
         const nowIso = new Date().toISOString();
-        await db.loadings.where('syncStatus').equals('PENDING').modify({
-          syncStatus: 'SYNCED',
-          syncedAt: nowIso
-        });
-        await db.expenses.where('syncStatus').equals('PENDING').modify({
-          syncStatus: 'SYNCED',
-          syncedAt: nowIso
-        });
-        // You might also want to mark closures as synced if needed.
+        if (result.syncedIds.loadings.length > 0) {
+          await db.loadings.where('id').anyOf(result.syncedIds.loadings).modify({
+            syncStatus: 'SYNCED',
+            syncedAt: nowIso
+          });
+        }
+        if (result.syncedIds.expenses.length > 0) {
+          await db.expenses.where('id').anyOf(result.syncedIds.expenses).modify({
+            syncStatus: 'SYNCED',
+            syncedAt: nowIso
+          });
+        }
+        if (result.syncedIds.closures.length > 0) {
+          await db.dailyClosures.where('id').anyOf(result.syncedIds.closures).modify({
+            syncStatus: 'SYNCED'
+          });
+        }
         return { success: true, count: totalPending, stats: result.stats };
       } else {
         return { success: false, error: result.error || "Erreur de synchronisation inconnue" };

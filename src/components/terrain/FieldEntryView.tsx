@@ -69,7 +69,7 @@ export const FieldEntryView: React.FC = () => {
     if (truckModels.length > 0) {
       setSelectedTruck(prev => {
         if (!prev || !truckModels.some(m => m.id === prev.id)) {
-          return truckModels[1] || truckModels[0];
+          return truckModels[0];
         }
         return prev;
       });
@@ -121,33 +121,40 @@ export const FieldEntryView: React.FC = () => {
       createdAt: new Date().toISOString()
     };
 
-    await db.loadings.add(newRecord);
+    try {
+      await db.transaction('rw', db.loadings, db.auditLogs, async () => {
+        await db.loadings.add(newRecord);
 
-    await db.auditLogs.add({
-      id: 'log_' + Date.now(),
-      userId: currentUser?.id || 'usr_agent_01',
-      userName: currentUser?.fullName || 'Agent Terrain',
-      userRole: currentUser?.role || 'AGENT_TERRAIN',
-      action: 'CREATE_LOADING',
-      entityName: 'loadings',
-      entityId: newRecord.id,
-      details: {
-        truck: newRecord.truckModelName,
-        qty: newRecord.quantity,
-        total: newRecord.totalPriceGNF
-      },
-      timestamp: new Date().toISOString()
-    });
+        await db.auditLogs.add({
+          id: 'log_' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36).slice(2)),
+          userId: currentUser?.id || 'usr_agent_01',
+          userName: currentUser?.fullName || 'Agent Terrain',
+          userRole: currentUser?.role || 'AGENT_TERRAIN',
+          action: 'CREATE_LOADING',
+          entityName: 'loadings',
+          entityId: newRecord.id,
+          details: {
+            truck: newRecord.truckModelName,
+            qty: newRecord.quantity,
+            total: newRecord.totalPriceGNF
+          },
+          timestamp: new Date().toISOString()
+        });
+      });
 
-    confetti({
-      particleCount: 40,
-      spread: 55,
-      origin: { y: 0.85 },
-      colors: ['#10b981', '#059669', '#34d399']
-    });
+      confetti({
+        particleCount: 40,
+        spread: 55,
+        origin: { y: 0.85 },
+        colors: ['#10b981', '#059669', '#34d399']
+      });
 
-    // Reset fields
-    setQuantity(1);
+      // Reset fields
+      setQuantity(1);
+    } catch (err) {
+      console.error('Erreur enregistrement chargement:', err);
+      alert("Une erreur est survenue lors de l'enregistrement du chargement. Veuillez réessayer.");
+    }
   };
 
   // Filtered loadings for recent list

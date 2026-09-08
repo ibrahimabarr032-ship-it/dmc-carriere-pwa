@@ -53,8 +53,10 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose, onS
     triggerHaptic('tap');
 
     const reader = new FileReader();
+    reader.onerror = () => setIsCompressingPhoto(false);
     reader.onload = (event) => {
       const img = new Image();
+      img.onerror = () => setIsCompressingPhoto(false);
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const MAX_WIDTH = 800;
@@ -88,8 +90,9 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose, onS
     triggerHaptic('success');
 
     try {
+      const expenseId = 'exp_' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36).slice(2));
       const newExpense: ExpenseRecord = {
-        id: 'exp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        id: expenseId,
         category,
         description: description.trim() || (category === 'FUEL' ? `Carburant ${fuelLiters}L engin carrière` : 'Dépense de fonctionnement'),
         fuelLiters: category === 'FUEL' && !isFuelByAmountDirect ? parseFloat(fuelLiters) || undefined : undefined,
@@ -106,7 +109,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose, onS
       await db.expenses.add(newExpense);
 
       await db.auditLogs.add({
-        id: 'log_' + Date.now(),
+        id: 'log_' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36).slice(2)),
         userId: currentUser?.id || 'usr_agent_01',
         userName: currentUser?.fullName || 'Agent',
         userRole: currentUser?.role || 'AGENT_TERRAIN',
@@ -171,6 +174,44 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose, onS
         </div>
 
         <form onSubmit={handleSubmit}>
+          {/* Category Selector */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '0.4rem' }}>
+              Catégorie de Dépense
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '0.4rem' }}>
+              {[
+                { id: 'FUEL', label: 'Carburant' },
+                { id: 'MAINTENANCE', label: 'Entretien' },
+                { id: 'FOOD', label: 'Repas' },
+                { id: 'SITE_FEES', label: 'Frais Site' },
+                { id: 'OTHER', label: 'Autre' }
+              ].map(cat => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('tap');
+                    setCategory(cat.id as ExpenseCategory);
+                  }}
+                  style={{
+                    padding: '0.5rem 0.3rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1.5px solid',
+                    borderColor: category === cat.id ? '#10b981' : '#e2e8f0',
+                    backgroundColor: category === cat.id ? '#ecfdf5' : '#ffffff',
+                    color: category === cat.id ? '#047857' : '#475569',
+                    fontSize: '0.78rem',
+                    fontWeight: category === cat.id ? 700 : 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* If Fuel Category */}
           {category === 'FUEL' && (

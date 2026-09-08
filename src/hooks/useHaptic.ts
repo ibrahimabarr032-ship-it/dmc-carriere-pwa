@@ -1,5 +1,27 @@
 import { useCallback } from 'react';
 
+type AudioCtxCtor = typeof AudioContext;
+let sharedCtx: AudioContext | null = null;
+
+function getAudioContext(): AudioContext | null {
+  if (typeof window === 'undefined') return null;
+  const Ctor: AudioCtxCtor | undefined =
+    window.AudioContext ||
+    (window as unknown as { webkitAudioContext?: AudioCtxCtor }).webkitAudioContext;
+  if (!Ctor) return null;
+  if (!sharedCtx || sharedCtx.state === 'closed') {
+    try {
+      sharedCtx = new Ctor();
+    } catch {
+      return null;
+    }
+  }
+  if (sharedCtx.state === 'suspended') {
+    void sharedCtx.resume();
+  }
+  return sharedCtx;
+}
+
 export function useHaptic() {
   const triggerHaptic = useCallback((pattern: 'tap' | 'success' | 'warning' | 'error' = 'tap') => {
     // 1. Mobile Device Vibration API
@@ -25,15 +47,22 @@ export function useHaptic() {
     }
 
     // 2. Subtle Web Audio Feedback (for PC and Mobile devices without vibration)
-    if (typeof window !== 'undefined' && 'AudioContext' in window) {
+    const ctx = getAudioContext();
+    if (ctx) {
       try {
-        const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-        const ctx = new AudioCtx();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
 
         osc.connect(gain);
         gain.connect(ctx.destination);
+        osc.onended = () => {
+          try {
+            osc.disconnect();
+            gain.disconnect();
+          } catch {
+            // Safe cleanup
+          }
+        };
 
         if (pattern === 'tap') {
           osc.frequency.setValueAtTime(420, ctx.currentTime);

@@ -40,17 +40,13 @@ export const AdminManagementView: React.FC = () => {
   const [truckTaxes, setTruckTaxes] = useState<{ id: string; name: string; amountGNF: number }[]>([
     { id: 't_' + Date.now(), name: 'Taxe Standard', amountGNF: 15000 }
   ]);
-  const truckAxlesRef = React.useRef<number>(3);
+  const [truckAxles, setTruckAxles] = useState<number>(3);
 
   // ==================== USER MANAGEMENT STATE ====================
   const [newUserName, setNewUserName] = useState<string>('');
   const [newUserRole, setNewUserRole] = useState<UserRole>('AGENT_TERRAIN');
 
   const [userCreatedMsg, setUserCreatedMsg] = useState<string>('');
-
-
-
-
 
   // ----------------------------------------------------
   // TRUCK CRUD HANDLERS
@@ -61,7 +57,7 @@ export const AdminManagementView: React.FC = () => {
     setTruckName('');
     setTruckPrice('');
     setTruckTaxes([{ id: 't_' + Date.now(), name: 'Taxe Standard', amountGNF: 15000 }]);
-    truckAxlesRef.current = 3;
+    setTruckAxles(3);
     setIsTruckModalOpen(true);
   };
 
@@ -72,10 +68,10 @@ export const AdminManagementView: React.FC = () => {
     setTruckPrice(truck.defaultPriceGNF.toString());
     setTruckTaxes(
       truck.taxes && truck.taxes.length > 0 
-        ? truck.taxes 
+        ? truck.taxes.map(t => ({ ...t }))
         : (truck.defaultTaxGNF ? [{ id: 't_' + Date.now(), name: 'Taxe Standard', amountGNF: truck.defaultTaxGNF }] : [])
     );
-    truckAxlesRef.current = truck.axleCount;
+    setTruckAxles(truck.axleCount || 3);
     setIsTruckModalOpen(true);
   };
 
@@ -93,29 +89,29 @@ export const AdminManagementView: React.FC = () => {
         defaultPriceGNF: priceNum,
         defaultTaxGNF: totalTaxNum,
         taxes: truckTaxes,
-        axleCount: truckAxlesRef.current
+        axleCount: truckAxles
       });
 
       await db.auditLogs.add({
-        id: 'log_' + Date.now(),
+        id: 'log_' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36).slice(2)),
         userId: currentUser?.id || 'admin',
         userName: currentUser?.fullName || 'Super-Admin',
         userRole: 'ADMINISTRATEUR',
-        action: 'PRICE_UPDATE',
+        action: 'UPDATE_TRUCK',
         entityName: 'truckModels',
         entityId: editingTruck.id,
-        details: { name: truckName.trim(), price: priceNum, axles: truckAxlesRef.current },
+        details: { name: truckName.trim(), price: priceNum, axles: truckAxles },
         timestamp: new Date().toISOString()
       });
     } else {
       const newTruck: TruckModel = {
-        id: 'trk_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
+        id: 'trk_' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36).slice(2)),
         name: truckName.trim(),
         defaultPriceGNF: priceNum,
         defaultTaxGNF: totalTaxNum,
         taxes: truckTaxes,
-        axleCount: truckAxlesRef.current,
-        iconType: truckAxlesRef.current >= 4 ? 'heavy' : truckAxlesRef.current === 3 ? 'medium' : 'small',
+        axleCount: truckAxles,
+        iconType: truckAxles >= 4 ? 'heavy' : truckAxles === 3 ? 'medium' : 'small',
         isActive: true,
         displayOrder: truckModels.length + 1
       };
@@ -123,14 +119,14 @@ export const AdminManagementView: React.FC = () => {
       await db.truckModels.add(newTruck);
 
       await db.auditLogs.add({
-        id: 'log_' + Date.now(),
+        id: 'log_' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36).slice(2)),
         userId: currentUser?.id || 'admin',
         userName: currentUser?.fullName || 'Super-Admin',
         userRole: 'ADMINISTRATEUR',
-        action: 'PRICE_UPDATE',
+        action: 'CREATE_TRUCK',
         entityName: 'truckModels',
         entityId: newTruck.id,
-        details: { name: newTruck.name, price: priceNum },
+        details: { name: newTruck.name, price: priceNum, axles: truckAxles },
         timestamp: new Date().toISOString()
       });
 
@@ -151,14 +147,14 @@ export const AdminManagementView: React.FC = () => {
       await db.truckModels.delete(truck.id);
 
       await db.auditLogs.add({
-        id: 'log_' + Date.now(),
+        id: 'log_' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36).slice(2)),
         userId: currentUser?.id || 'admin',
         userName: currentUser?.fullName || 'Super-Admin',
         userRole: 'ADMINISTRATEUR',
-        action: 'PRICE_UPDATE',
+        action: 'DELETE_TRUCK',
         entityName: 'truckModels',
         entityId: truck.id,
-        details: { deletedModel: truck.name },
+        details: { name: truck.name },
         timestamp: new Date().toISOString()
       });
     }
@@ -192,11 +188,11 @@ export const AdminManagementView: React.FC = () => {
     await db.users.add(newUser);
 
     await db.auditLogs.add({
-      id: 'log_' + Date.now(),
+      id: 'log_' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36).slice(2)),
       userId: currentUser?.id || 'admin',
       userName: currentUser?.fullName || 'Administrateur Principal',
       userRole: 'ADMINISTRATEUR',
-      action: 'USER_LOGIN',
+      action: 'CREATE_USER',
       entityName: 'users',
       entityId: newUser.id,
       details: { createdUser: newUser.fullName, roleAssigned: newUser.role },
@@ -625,6 +621,24 @@ export const AdminManagementView: React.FC = () => {
                 />
               </div>
 
+              <div style={{ marginBottom: '1rem' }}>
+                <label htmlFor="truckAxles" style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '0.35rem' }}>
+                  Nombre d'essieux ({truckAxles} essieux)
+                </label>
+                <select
+                  id="truckAxles"
+                  value={truckAxles}
+                  onChange={(e) => setTruckAxles(Number(e.target.value) || 3)}
+                  className="input-field"
+                >
+                  <option value={2}>2 essieux (Petit porteur / 6 Roues)</option>
+                  <option value={3}>3 essieux (10 Roues standard Howo)</option>
+                  <option value={4}>4 essieux (12 Roues européen lourd)</option>
+                  <option value={5}>5 essieux (Semi-remorque 40t+)</option>
+                  <option value={6}>6+ essieux (Convoi exceptionnel)</option>
+                </select>
+              </div>
+
               <div style={{ marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                   <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
@@ -655,9 +669,8 @@ export const AdminManagementView: React.FC = () => {
                       placeholder="Nom (ex: Syndicat)"
                       value={tax.name}
                       onChange={(e) => {
-                        const newTaxes = [...truckTaxes];
-                        newTaxes[index].name = e.target.value;
-                        setTruckTaxes(newTaxes);
+                        const val = e.target.value;
+                        setTruckTaxes(prev => prev.map((t, i) => i === index ? { ...t, name: val } : t));
                       }}
                       className="input-field"
                       style={{ flex: 1 }}
@@ -671,9 +684,8 @@ export const AdminManagementView: React.FC = () => {
                       placeholder="Montant (GNF)"
                       value={tax.amountGNF || ''}
                       onChange={(e) => {
-                        const newTaxes = [...truckTaxes];
-                        newTaxes[index].amountGNF = parseInt(e.target.value, 10) || 0;
-                        setTruckTaxes(newTaxes);
+                        const val = parseInt(e.target.value, 10) || 0;
+                        setTruckTaxes(prev => prev.map((t, i) => i === index ? { ...t, amountGNF: val } : t));
                       }}
                       className="input-field font-mono"
                       style={{ width: '130px' }}

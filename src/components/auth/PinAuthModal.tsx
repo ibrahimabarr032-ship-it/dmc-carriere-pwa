@@ -52,7 +52,7 @@ export const PinAuthModal: React.FC<PinAuthModalProps> = ({ isOpen, onClose, tar
         onClose();
       } else {
         triggerHaptic('error');
-        setErrorMsg('Mot de passe ou Code PIN incorrect (ex: 0000, 1234, 9999)');
+        setErrorMsg('Mot de passe ou Code PIN incorrect.');
       }
     } finally {
       setIsSubmitting(false);
@@ -307,13 +307,6 @@ export const PinAuthModal: React.FC<PinAuthModalProps> = ({ isOpen, onClose, tar
               <ArrowRight size={18} />
             </button>
           </form>
-
-          {/* Quick PIN Hint */}
-          <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
-            <p style={{ fontSize: '0.76rem', color: '#64748b' }}>
-              PINs démo : <strong>0000</strong> (Admin) • <strong>9999</strong> (Propriétaire) • <strong>1234</strong> (Pointeur)
-            </p>
-          </div>
         </div>
 
         {/* Clean Footer Text */}

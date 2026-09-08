@@ -1,5 +1,5 @@
+import { getSupabaseClient, saveSupabaseConfig } from './supabaseClient';
 import { db } from '../db/localDb';
-import { getSupabaseClient, getSupabaseConfig, saveSupabaseConfig } from './supabaseClient';
 import { TruckModel, UserAccount } from '../../types/domain';
 
 export interface SyncStats {
@@ -9,22 +9,34 @@ export interface SyncStats {
   pushedReports: number;
   pulledTrucks: number;
   pulledUsers: number;
-  pulledTaxes: number;
-  timestamp: string;
 }
 
-export const syncAllDataWithSupabase = async (): Promise<{ success: boolean; stats: SyncStats; error?: string }> => {
-  const client = getSupabaseClient();
+export interface SyncResult {
+  success: boolean;
+  stats: SyncStats;
+  syncedIds?: {
+    loadings: string[];
+    expenses: string[];
+    closures: string[];
+  };
+  error?: string;
+}
 
+export const syncAllDataWithSupabase = async (): Promise<SyncResult> => {
+  const client = getSupabaseClient();
   const stats: SyncStats = {
     pushedLoadings: 0,
     pushedExpenses: 0,
     pushedClosures: 0,
     pushedReports: 0,
     pulledTrucks: 0,
-    pulledUsers: 0,
-    pulledTaxes: 0,
-    timestamp: new Date().toISOString()
+    pulledUsers: 0
+  };
+
+  const syncedIds = {
+    loadings: [] as string[],
+    expenses: [] as string[],
+    closures: [] as string[]
   };
 
   if (!client) {
@@ -38,105 +50,102 @@ export const syncAllDataWithSupabase = async (): Promise<{ success: boolean; sta
   try {
     // 1. Push Local Loadings to Supabase
     const localLoadings = await db.loadings.toArray();
-    if (localLoadings.length > 0) {
-      const payload = localLoadings.map(l => ({
+    const pendingLoadings = localLoadings.filter(l => l.syncStatus === 'PENDING' || !l.syncStatus);
+    if (pendingLoadings.length > 0) {
+      const payload = pendingLoadings.map(l => ({
         id: l.id,
-        "truckModelId": l.truckModelId,
-        "truckPlateNumber": l.truckPlate || null,
-        "driverName": null, // local model doesn't have it
-        "companyName": l.clientName || null,
-        "loadingTime": l.loadingTime,
-        "departureTime": null, // Not used locally yet
-        "ticketNumber": null, // Not used locally yet
-        "priceGNF": l.totalPriceGNF,
-        "taxesGNF": l.taxAmountGNF,
-        "taxBreakdown": l.taxBreakdown ? structuredClone(l.taxBreakdown) : null,
-        "netMarginGNF": l.totalPriceGNF - l.taxAmountGNF,
-        "recordedBy": l.createdByUserId,
-        "syncStatus": 'SYNCED',
-        "createdAt": l.createdAt
+        truck_model_id: l.truckModelId,
+        truck_model_name: l.truckModelName,
+        quantity: l.quantity || 1,
+        unit_price_gnf: l.unitPriceGNF,
+        total_price_gnf: l.totalPriceGNF,
+        tax_amount_gnf: l.taxAmountGNF || 0,
+        truck_plate: l.truckPlate || null,
+        client_name: l.clientName || null,
+        loading_time: l.loadingTime,
+        created_by_user_id: l.createdByUserId,
+        created_by_user_name: l.createdByName,
+        created_at: l.createdAt
       }));
 
       const { error } = await client.from('loadings').upsert(payload, { onConflict: 'id' });
-      if (!error) {
-        stats.pushedLoadings = payload.length;
+      if (error) {
+        return { success: false, stats, error: `Échec de la synchronisation des chargements: ${error.message}` };
       }
+      stats.pushedLoadings = payload.length;
+      syncedIds.loadings.push(...pendingLoadings.map(l => l.id));
     }
 
     // 2. Push Local Expenses
     const localExpenses = await db.expenses.toArray();
-    if (localExpenses.length > 0) {
-      const payload = localExpenses.map(e => ({
+    const pendingExpenses = localExpenses.filter(e => e.syncStatus === 'PENDING' || !e.syncStatus);
+    if (pendingExpenses.length > 0) {
+      const payload = pendingExpenses.map(e => ({
         id: e.id,
+        expense_date: e.expenseTime,
         category: e.category,
-        amount: e.totalAmountGNF,
-        description: e.description || null,
-        "expenseTime": e.expenseTime,
-        "recordedBy": e.createdByUserId,
-        "syncStatus": 'SYNCED',
-        "createdAt": e.createdAt
+        amount_gnf: e.totalAmountGNF,
+        liters_fuel: e.fuelLiters || null,
+        price_per_liter_gnf: e.fuelPricePerLiterGNF || null,
+        description: e.description || '',
+        receipt_photo_url: e.receiptPhotoBase64 || null,
+        created_by_user_id: e.createdByUserId,
+        created_by_user_name: e.createdByName,
+        created_at: e.createdAt
       }));
 
       const { error } = await client.from('expenses').upsert(payload, { onConflict: 'id' });
-      if (!error) {
-        stats.pushedExpenses = payload.length;
+      if (error) {
+        return { success: false, stats, error: `Échec de la synchronisation des dépenses: ${error.message}` };
       }
+      stats.pushedExpenses = payload.length;
+      syncedIds.expenses.push(...pendingExpenses.map(e => e.id));
     }
 
     // 3. Push Local Closures
     const localClosures = await db.dailyClosures.toArray();
-    if (localClosures.length > 0) {
-      const payload = localClosures.map(c => ({
+    const pendingClosures = localClosures.filter(c => c.syncStatus === 'PENDING' || !c.syncStatus);
+    if (pendingClosures.length > 0) {
+      const payload = pendingClosures.map(c => ({
         id: c.id,
-        "closureDate": c.closureDate,
-        "totalLoadings": c.totalTrucks,
-        "totalRevenue": c.grossRevenueGNF,
-        "totalTaxes": c.totalTaxesGNF,
-        "totalExpenses": c.totalFuelGNF + c.totalOpexGNF,
-        "netMargin": c.netProfitGNF,
-        "closedBy": c.closedByUserId,
-        status: c.status,
-        "createdAt": c.closedAt
+        closure_date: c.closureDate,
+        total_trucks: c.totalTrucks,
+        gross_revenue_gnf: c.grossRevenueGNF,
+        total_taxes_gnf: c.totalTaxesGNF,
+        fuel_expenses_gnf: c.totalFuelGNF,
+        opex_expenses_gnf: c.totalOpexGNF,
+        net_margin_gnf: c.netProfitGNF,
+        is_locked: c.status === 'CLOSED',
+        locked_by_user_id: c.closedByUserId,
+        locked_by_user_name: c.closedByName,
+        supervisor_notes: c.notes || null,
+        created_at: c.closedAt
       }));
 
       const { error } = await client.from('daily_closures').upsert(payload, { onConflict: 'id' });
-      if (!error) {
-        stats.pushedClosures = payload.length;
+      if (error) {
+        return { success: false, stats, error: `Échec de la synchronisation des clôtures: ${error.message}` };
       }
+      stats.pushedClosures = payload.length;
+      syncedIds.closures.push(...pendingClosures.map(c => c.id));
     }
 
-    // 3.5. Push Local Daily Reports
-    const localReports = await db.dailyReports.toArray();
-    if (localReports.length > 0) {
-      const payload = localReports.map(r => ({
-        id: r.id,
-        reportDate: r.reportDate,
-        photos: r.photos ? structuredClone(r.photos) : [],
-        notes: r.notes || null,
-        syncStatus: 'SYNCED',
-        createdAt: r.createdAt
-      }));
-
-      const { error } = await client.from('daily_reports').upsert(payload, { onConflict: 'id' });
-      if (!error) {
-        stats.pushedReports = payload.length;
-      }
-    }
-
-    // 4. Push/Pull Truck Models (Master data)
+    // 4. Push/Pull Truck Models (Catalogue)
     const localTrucks = await db.truckModels.toArray();
     if (localTrucks.length > 0) {
       const payload = localTrucks.map(t => ({
         id: t.id,
         name: t.name,
-        "axleCount": t.axleCount,
-        "defaultPriceGNF": t.defaultPriceGNF,
-        "iconType": t.iconType,
-        "isActive": t.isActive,
-        "displayOrder": t.displayOrder,
-        "taxes": t.taxes ? structuredClone(t.taxes) : null
+        default_price_gnf: t.defaultPriceGNF,
+        axle_count: t.axleCount,
+        icon_type: t.iconType,
+        is_active: t.isActive,
+        display_order: t.displayOrder
       }));
-      await client.from('truck_models').upsert(payload, { onConflict: 'id' });
+      const { error: truckUpsertErr } = await client.from('truck_models').upsert(payload, { onConflict: 'id' });
+      if (truckUpsertErr) {
+        console.warn('Truck models push warning:', truckUpsertErr.message);
+      }
     }
 
     // Fetch latest truck models from Supabase into local db
@@ -145,29 +154,28 @@ export const syncAllDataWithSupabase = async (): Promise<{ success: boolean; sta
       const localTrucksToPut: TruckModel[] = remoteTrucks.map(rt => ({
         id: rt.id,
         name: rt.name,
-        defaultPriceGNF: Number(rt.defaultPriceGNF),
-        axleCount: rt.axleCount,
-        iconType: rt.iconType,
-        isActive: rt.isActive,
-        displayOrder: rt.displayOrder,
-        taxes: rt.taxes ? structuredClone(rt.taxes) : []
+        defaultPriceGNF: Number(rt.default_price_gnf || rt.defaultPriceGNF || 0),
+        axleCount: rt.axle_count || rt.axleCount || 3,
+        iconType: rt.icon_type || rt.iconType || 'medium',
+        isActive: rt.is_active !== undefined ? rt.is_active : true,
+        displayOrder: rt.display_order || rt.displayOrder || 1
       }));
       await db.truckModels.bulkPut(localTrucksToPut);
       stats.pulledTrucks = remoteTrucks.length;
     }
 
-    // 5. Pull User Accounts
-    const { data: remoteUsers } = await client.from('users').select('*');
-    if (remoteUsers && remoteUsers.length > 0) {
+    // 5. Pull User Accounts from user_accounts
+    const { data: remoteUsers, error: userErr } = await client.from('user_accounts').select('*');
+    if (!userErr && remoteUsers && remoteUsers.length > 0) {
       const localUsersToPut: UserAccount[] = remoteUsers.map(ru => ({
         id: ru.id,
-        fullName: ru.fullName,
-        role: ru.role,
-        pinCode: ru.pinCode,
-        avatarColor: ru.avatarColor,
+        fullName: ru.full_name || ru.fullName,
+        role: ru.role === 'POINTEUR' ? 'AGENT_TERRAIN' : ru.role,
+        pinCode: ru.pin_code || ru.pinCode,
+        avatarColor: ru.avatar_color || ru.avatarColor || '#10b981',
         phone: ru.phone,
-        siteName: ru.siteName,
-        isActive: ru.isActive
+        siteName: ru.site_name || ru.siteName || 'DMC Carrière',
+        isActive: ru.is_active !== undefined ? ru.is_active : true
       }));
       await db.users.bulkPut(localUsersToPut);
       stats.pulledUsers = remoteUsers.length;
@@ -181,7 +189,8 @@ export const syncAllDataWithSupabase = async (): Promise<{ success: boolean; sta
 
     return {
       success: true,
-      stats
+      stats,
+      syncedIds
     };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);

@@ -289,6 +289,7 @@ export const DailyJournalView: React.FC = () => {
     const dateSet = new Set<string>();
     allLoadings.forEach(l => dateSet.add(l.loadingTime.substring(0, 10)));
     allExpenses.forEach(e => dateSet.add(e.expenseTime.substring(0, 10)));
+    allReports.forEach(r => { if ((r.photos?.length ?? 0) > 0) dateSet.add(r.reportDate); });
 
     return Array.from(dateSet).sort((a, b) => b.localeCompare(a)).map(date => {
       const dayLoadings = allLoadings.filter(l => l.loadingTime.substring(0, 10) === date);
