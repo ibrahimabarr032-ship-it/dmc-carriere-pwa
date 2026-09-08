@@ -7,13 +7,14 @@ interface DateTimePickerProps {
   maxDate?: string; // YYYY-MM-DD, defaults to today
 }
 
+const pad = (n: number) => n.toString().padStart(2, '0');
+
 export const DateTimePicker: React.FC<DateTimePickerProps> = ({
   value,
   onChange,
   label = 'Date & Heure du passage',
   maxDate
 }) => {
-  const pad = (n: number) => n.toString().padStart(2, '0');
   const now = new Date();
   const localToday = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
   const max = maxDate || localToday;

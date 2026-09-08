@@ -176,9 +176,9 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose, onS
         <form onSubmit={handleSubmit}>
           {/* Category Selector */}
           <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '0.4rem' }}>
+            <span style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '0.4rem' }}>
               Catégorie de Dépense
-            </label>
+            </span>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '0.4rem' }}>
               {[
                 { id: 'FUEL', label: 'Carburant' },
@@ -204,7 +204,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose, onS
                     fontSize: '0.78rem',
                     fontWeight: category === cat.id ? 700 : 500,
                     cursor: 'pointer',
-                    transition: 'all 0.15s ease'
+                    transition: 'border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease'
                   }}
                 >
                   {cat.label}
