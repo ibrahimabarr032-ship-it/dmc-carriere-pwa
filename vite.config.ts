@@ -9,7 +9,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'dmc-logo.svg'],
       manifest: {
-        name: 'DMC Carrière Sable — Système de Traçabilité',
+        name: 'DMC Carrière Sable',
         short_name: 'DMC Carrière',
         description: 'Système PWA Offline-First de traçabilité des chargements, dépenses et clôture journalière de carrière DMC à Boussoura (Kindia).',
         theme_color: '#0d1512',
