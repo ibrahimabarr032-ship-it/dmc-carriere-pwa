@@ -1,7 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, seedDefaultLocalData } from '../services/db/localDb';
-import { syncAllDataWithSupabase, syncUserPinToSupabase } from '../services/supabase/supabaseSync';
+import {
+  syncAllDataWithSupabase,
+  syncUserPinToSupabase,
+  resetUserPinInSupabase,
+  deleteUserAccountFromSupabase
+} from '../services/supabase/supabaseSync';
 import { UserAccount, UserRole } from '../types/domain';
 
 /**
@@ -13,6 +18,8 @@ interface AuthContextType {
   isLoading: boolean;
   loginWithPin: (userId: string, pin: string) => Promise<boolean>;
   updateUserPin: (userId: string, newPin: string) => Promise<boolean>;
+  resetUserPin: (userId: string) => Promise<boolean>;
+  deleteUser: (userId: string) => Promise<boolean>;
   switchUserRole: (role: UserRole) => void;
   logout: () => void;
   activeRole: UserRole;
@@ -40,11 +47,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     async function init() {
       // 1. Initialise immédiatement les profils locaux par défaut si premier lancement
       await seedDefaultLocalData();
-      // 2. Tente de synchroniser avec Supabase pour récupérer les mises à jour distantes
+      // 2. Tente de synchroniser avec Supabase pour récupérer les utilisateurs et tarifs distants
       await syncAllDataWithSupabase();
       setIsLoading(false);
     }
     init();
+
+    // Synchronisation périodique automatique en arrière-plan toutes les 15 secondes
+    const interval = setInterval(() => {
+      syncAllDataWithSupabase();
+    }, 15000);
+
+    // Synchronisation immédiate quand l'onglet redevient actif ou revient en ligne
+    const handleFocus = () => syncAllDataWithSupabase();
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('online', handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('online', handleFocus);
+    };
   }, []);
 
   const loginWithPin = useCallback(async (userId: string, pin: string): Promise<boolean> => {
@@ -73,14 +96,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateUserPin = useCallback(async (userId: string, newPin: string): Promise<boolean> => {
     try {
-      await syncUserPinToSupabase(userId, newPin);
-      setCurrentUser(prev => (prev && prev.id === userId ? { ...prev, pinCode: newPin } : prev));
-      return true;
+      const ok = await syncUserPinToSupabase(userId, newPin);
+      if (ok) {
+        setCurrentUser(prev => (prev && prev.id === userId ? { ...prev, pinCode: newPin } : prev));
+      }
+      return ok;
     } catch (err) {
       console.error('Erreur lors de la mise à jour du PIN:', err);
       return false;
     }
   }, []);
+
+  const resetUserPin = useCallback(async (userId: string): Promise<boolean> => {
+    try {
+      const ok = await resetUserPinInSupabase(userId);
+      if (ok) {
+        setCurrentUser(prev => (prev && prev.id === userId ? { ...prev, pinCode: '0000' } : prev));
+      }
+      return ok;
+    } catch (err) {
+      console.error('Erreur lors de la réinitialisation du PIN:', err);
+      return false;
+    }
+  }, []);
+
+  const deleteUser = useCallback(async (userId: string): Promise<boolean> => {
+    try {
+      const ok = await deleteUserAccountFromSupabase(userId);
+      if (ok && currentUser?.id === userId) {
+        setCurrentUser(null);
+      }
+      return ok;
+    } catch (err) {
+      console.error('Erreur lors de la suppression du compte:', err);
+      return false;
+    }
+  }, [currentUser]);
 
   const switchUserRole = useCallback((role: UserRole) => {
     setActiveRole(role);
@@ -100,11 +151,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     loginWithPin,
     updateUserPin,
+    resetUserPin,
+    deleteUser,
     switchUserRole,
     logout,
     activeRole,
     setActiveRole
-  }), [currentUser, allUsers, isLoading, loginWithPin, updateUserPin, switchUserRole, logout, activeRole, setActiveRole]);
+  }), [currentUser, allUsers, isLoading, loginWithPin, updateUserPin, resetUserPin, deleteUser, switchUserRole, logout, activeRole, setActiveRole]);
 
   return (
     <AuthContext.Provider value={contextValue}>

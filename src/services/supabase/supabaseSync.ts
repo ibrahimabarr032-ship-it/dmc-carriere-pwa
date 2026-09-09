@@ -31,59 +31,85 @@ export interface SyncResult {
 /**
  * Synchronise immédiatement la modification du code PIN d'un utilisateur vers IndexedDB et Supabase.
  */
-export const syncUserPinToSupabase = async (userId: string, newPin: string): Promise<void> => {
-  // 1. Mise à jour IndexedDB locale
-  await db.users.update(userId, { pinCode: newPin });
+export const syncUserPinToSupabase = async (userId: string, newPin: string): Promise<boolean> => {
+  try {
+    // 1. Mise à jour IndexedDB locale
+    await db.users.update(userId, { pinCode: newPin });
 
-  // 2. Mise à jour distante Supabase si connecté
-  const client = getSupabaseClient();
-  if (client) {
-    try {
+    // 2. Mise à jour distante Supabase si connecté
+    const client = getSupabaseClient();
+    if (client) {
       const { error: err1 } = await client
         .from('users')
-        .update({ pinCode: newPin, pin_code: newPin })
+        .update({ pinCode: newPin })
         .eq('id', userId);
 
       if (err1) {
-        await client
-          .from('user_accounts')
-          .update({ pin_code: newPin, pinCode: newPin })
-          .eq('id', userId);
+        console.warn('Avertissement mise à jour PIN Supabase:', err1);
+        return false;
       }
-    } catch (err) {
-      console.warn('Avertissement mise à jour PIN Supabase:', err);
     }
+    return true;
+  } catch (err) {
+    console.error('Erreur syncUserPinToSupabase:', err);
+    return false;
+  }
+};
+
+/**
+ * Réinitialise le mot de passe d'un utilisateur à 0000 sur Dexie et Supabase.
+ */
+export const resetUserPinInSupabase = async (userId: string): Promise<boolean> => {
+  return syncUserPinToSupabase(userId, '0000');
+};
+
+/**
+ * Supprime définitivement un compte utilisateur de Dexie et Supabase.
+ */
+export const deleteUserAccountFromSupabase = async (userId: string): Promise<boolean> => {
+  try {
+    await db.users.delete(userId);
+    const client = getSupabaseClient();
+    if (client) {
+      const { error } = await client.from('users').delete().eq('id', userId);
+      if (error) {
+        console.warn('Avertissement suppression utilisateur Supabase:', error);
+        return false;
+      }
+    }
+    return true;
+  } catch (err) {
+    console.error('Erreur deleteUserAccountFromSupabase:', err);
+    return false;
   }
 };
 
 /**
  * Synchronise un compte utilisateur créé ou modifié vers Supabase.
  */
-export const syncUserAccountToSupabase = async (user: UserAccount): Promise<void> => {
+export const syncUserAccountToSupabase = async (user: UserAccount): Promise<boolean> => {
   const client = getSupabaseClient();
-  if (!client) return;
+  if (!client) return false;
   try {
     const payload = {
       id: user.id,
       fullName: user.fullName,
-      full_name: user.fullName,
       role: user.role,
       pinCode: user.pinCode,
-      pin_code: user.pinCode,
       avatarColor: user.avatarColor || '#10b981',
-      avatar_color: user.avatarColor || '#10b981',
       isActive: user.isActive !== undefined ? user.isActive : true,
-      is_active: user.isActive !== undefined ? user.isActive : true,
       phone: user.phone || null,
-      siteName: user.siteName || 'DMC Carrière',
-      site_name: user.siteName || 'DMC Carrière'
+      siteName: user.siteName || 'DMC Carrière'
     };
     const { error } = await client.from('users').upsert([payload], { onConflict: 'id' });
     if (error) {
-      await client.from('user_accounts').upsert([payload], { onConflict: 'id' });
+      console.warn('Avertissement sync utilisateur Supabase:', error);
+      return false;
     }
+    return true;
   } catch (err) {
     console.warn('Avertissement sync utilisateur Supabase:', err);
+    return false;
   }
 };
 
@@ -98,15 +124,10 @@ export const syncTruckModelToSupabase = async (truck: TruckModel): Promise<void>
       id: truck.id,
       name: truck.name,
       axleCount: truck.axleCount || 3,
-      axle_count: truck.axleCount || 3,
       defaultPriceGNF: Number(truck.defaultPriceGNF || 0),
-      default_price_gnf: Number(truck.defaultPriceGNF || 0),
       iconType: truck.iconType || 'medium',
-      icon_type: truck.iconType || 'medium',
       isActive: truck.isActive !== undefined ? truck.isActive : true,
-      is_active: truck.isActive !== undefined ? truck.isActive : true,
       displayOrder: truck.displayOrder || 1,
-      display_order: truck.displayOrder || 1,
       taxes: truck.taxes || []
     };
     await client.from('truck_models').upsert([payload], { onConflict: 'id' });
@@ -165,49 +186,23 @@ export const syncAllDataWithSupabase = async (): Promise<SyncResult> => {
 
   try {
     // 1. PULL USERS EN PRIORITÉ DEPUIS SUPABASE (Source de vérité pour les PIN modifiés)
-    let remoteUsers: any[] | null = null;
-    let usersErr = null;
-    const resUsers = await client.from('users').select('*');
-    if (resUsers.error) {
-      const resAccounts = await client.from('user_accounts').select('*');
-      if (!resAccounts.error && resAccounts.data) {
-        remoteUsers = resAccounts.data;
-      } else {
-        usersErr = resUsers.error;
-      }
-    } else {
-      remoteUsers = resUsers.data;
-    }
+    const { data: remoteUsers, error: usersErr } = await client.from('users').select('*');
 
     if (!usersErr && remoteUsers && remoteUsers.length > 0) {
       const usersToPut: UserAccount[] = remoteUsers.map(ru => ({
         id: ru.id,
-        fullName: ru.fullName || ru.full_name,
+        fullName: ru.fullName,
         role: ru.role === 'POINTEUR' ? 'AGENT_TERRAIN' : ru.role,
-        pinCode: ru.pinCode || ru.pin_code,
-        avatarColor: ru.avatarColor || ru.avatar_color || '#10b981',
+        pinCode: ru.pinCode,
+        avatarColor: ru.avatarColor || '#3b82f6',
         phone: ru.phone,
-        siteName: ru.siteName || ru.site_name || 'DMC Carrière',
-        isActive: ru.isActive !== undefined ? ru.isActive : (ru.is_active !== undefined ? ru.is_active : true)
+        siteName: ru.siteName || 'DMC Carrière',
+        isActive: ru.isActive !== undefined ? ru.isActive : true
       }));
+      // Purge local des utilisateurs périmés pour refléter Supabase à 100%
+      await db.users.clear();
       await db.users.bulkPut(usersToPut);
       stats.pulledUsers = remoteUsers.length;
-    } else if (!usersErr && (!remoteUsers || remoteUsers.length === 0)) {
-      // Si la table distante est vierge, on envoie les utilisateurs locaux par défaut
-      const localUsers = await db.users.toArray();
-      if (localUsers.length > 0) {
-        const userPayload = localUsers.map(u => ({
-          id: u.id,
-          fullName: u.fullName,
-          role: u.role,
-          pinCode: u.pinCode,
-          avatarColor: u.avatarColor || '#10b981',
-          isActive: u.isActive !== undefined ? u.isActive : true,
-          phone: u.phone || null,
-          siteName: u.siteName || 'DMC Carrière'
-        }));
-        await client.from('users').upsert(userPayload, { onConflict: 'id' });
-      }
     }
 
     // 2. PULL TRUCK MODELS EN PRIORITÉ DEPUIS SUPABASE
@@ -216,31 +211,17 @@ export const syncAllDataWithSupabase = async (): Promise<SyncResult> => {
       const trucksToPut: TruckModel[] = remoteTrucks.map(rt => ({
         id: rt.id,
         name: rt.name,
-        defaultPriceGNF: Number(rt.defaultPriceGNF ?? rt.default_price_gnf ?? 0),
-        axleCount: rt.axleCount ?? rt.axle_count ?? 3,
-        iconType: rt.iconType ?? rt.icon_type ?? 'medium',
-        isActive: rt.isActive !== undefined ? rt.isActive : (rt.is_active !== undefined ? rt.is_active : true),
-        displayOrder: rt.displayOrder ?? rt.display_order ?? 1,
+        defaultPriceGNF: Number(rt.defaultPriceGNF || 0),
+        axleCount: rt.axleCount || 3,
+        iconType: rt.iconType || 'medium',
+        isActive: rt.isActive !== undefined ? rt.isActive : true,
+        displayOrder: rt.displayOrder || 1,
         taxes: rt.taxes || []
       }));
+      // Purge local des camions périmés pour refléter Supabase à 100%
+      await db.truckModels.clear();
       await db.truckModels.bulkPut(trucksToPut);
       stats.pulledTrucks = remoteTrucks.length;
-    } else if (!trucksErr && (!remoteTrucks || remoteTrucks.length === 0)) {
-      // Si la table camions distante est vierge, on envoie les camions locaux
-      const localTrucks = await db.truckModels.toArray();
-      if (localTrucks.length > 0) {
-        const truckPayload = localTrucks.map(t => ({
-          id: t.id,
-          name: t.name,
-          axleCount: t.axleCount || 3,
-          defaultPriceGNF: Number(t.defaultPriceGNF || 0),
-          iconType: t.iconType || 'medium',
-          isActive: t.isActive !== undefined ? t.isActive : true,
-          displayOrder: t.displayOrder || 1,
-          taxes: t.taxes || []
-        }));
-        await client.from('truck_models').upsert(truckPayload, { onConflict: 'id' });
-      }
     }
 
     // 3. PUSH LOCAL LOADINGS TO SUPABASE (Table 'loadings')
