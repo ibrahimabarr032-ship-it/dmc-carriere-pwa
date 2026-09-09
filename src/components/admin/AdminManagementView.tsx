@@ -7,6 +7,11 @@ import { useHaptic } from '../../hooks/useHaptic';
 import { TruckModel, UserAccount, UserRole } from '../../types/domain';
 import { formatGNF } from '../../services/pdf/pdfGenerator';
 import {
+  syncUserAccountToSupabase,
+  syncTruckModelToSupabase,
+  deleteTruckModelFromSupabase
+} from '../../services/supabase/supabaseSync';
+import {
   Truck,
   Users,
   UserPlus,
@@ -84,6 +89,15 @@ export const AdminManagementView: React.FC = () => {
     triggerHaptic('success');
 
     if (editingTruck) {
+      const updatedTruck: TruckModel = {
+        ...editingTruck,
+        name: truckName.trim(),
+        defaultPriceGNF: priceNum,
+        defaultTaxGNF: totalTaxNum,
+        taxes: truckTaxes,
+        axleCount: truckAxles
+      };
+
       await db.truckModels.update(editingTruck.id, {
         name: truckName.trim(),
         defaultPriceGNF: priceNum,
@@ -91,6 +105,7 @@ export const AdminManagementView: React.FC = () => {
         taxes: truckTaxes,
         axleCount: truckAxles
       });
+      await syncTruckModelToSupabase(updatedTruck);
 
       await db.auditLogs.add({
         id: 'log_' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36).slice(2)),
@@ -117,6 +132,7 @@ export const AdminManagementView: React.FC = () => {
       };
 
       await db.truckModels.add(newTruck);
+      await syncTruckModelToSupabase(newTruck);
 
       await db.auditLogs.add({
         id: 'log_' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36).slice(2)),
@@ -145,6 +161,7 @@ export const AdminManagementView: React.FC = () => {
     if (confirm(`Êtes-vous sûr de vouloir supprimer définitivement le modèle "${truck.name}" ?`)) {
       triggerHaptic('warning');
       await db.truckModels.delete(truck.id);
+      await deleteTruckModelFromSupabase(truck.id);
 
       await db.auditLogs.add({
         id: 'log_' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36).slice(2)),
@@ -162,7 +179,9 @@ export const AdminManagementView: React.FC = () => {
 
   const handleToggleTruckActive = async (truck: TruckModel) => {
     triggerHaptic('tap');
-    await db.truckModels.update(truck.id, { isActive: !truck.isActive });
+    const newActive = !truck.isActive;
+    await db.truckModels.update(truck.id, { isActive: newActive });
+    await syncTruckModelToSupabase({ ...truck, isActive: newActive });
   };
 
   // ----------------------------------------------------
@@ -186,6 +205,7 @@ export const AdminManagementView: React.FC = () => {
     };
 
     await db.users.add(newUser);
+    await syncUserAccountToSupabase(newUser);
 
     await db.auditLogs.add({
       id: 'log_' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36).slice(2)),

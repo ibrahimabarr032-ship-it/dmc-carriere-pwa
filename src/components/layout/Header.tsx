@@ -35,7 +35,7 @@ const getInitials = (name?: string) => {
 };
 
 const AccountMenu: React.FC<AccountMenuProps> = ({ onClose }) => {
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, updateUserPin } = useAuth();
   const { triggerHaptic } = useHaptic();
   const [showChangePinForm, setShowChangePinForm] = useState(false);
   const [newPin, setNewPin] = useState('');
@@ -43,6 +43,7 @@ const AccountMenu: React.FC<AccountMenuProps> = ({ onClose }) => {
   const [pinError, setPinError] = useState('');
   const [pinSuccess, setPinSuccess] = useState('');
   const [showPinVisibility, setShowPinVisibility] = useState(false);
+  const [isSavingPin, setIsSavingPin] = useState(false);
 
   const handleLogout = () => {
     triggerHaptic('tap');
@@ -50,22 +51,46 @@ const AccountMenu: React.FC<AccountMenuProps> = ({ onClose }) => {
     onClose();
   };
 
-  const handleSavePin = () => {
+  const handleSavePin = async () => {
     setPinError('');
     setPinSuccess('');
-    if (newPin.length < 4) {
-      setPinError('Le code PIN doit contenir au moins 4 caractères.');
+    if (!currentUser) return;
+    if (newPin.length !== 4 || confirmPin.length !== 4) {
+      setPinError('Le code PIN doit contenir exactement 4 chiffres.');
       return;
     }
     if (newPin !== confirmPin) {
       setPinError('Les codes PIN ne correspondent pas.');
       return;
     }
-    // Here you would call a real API / db update; for now we just show success
-    setPinSuccess('Code PIN mis à jour avec succès !');
-    setNewPin('');
-    setConfirmPin('');
-    setTimeout(() => setPinSuccess(''), 3000);
+    if (newPin === '0000') {
+      setPinError('Veuillez choisir un code PIN différent de 0000.');
+      return;
+    }
+
+    setIsSavingPin(true);
+    try {
+      const ok = await updateUserPin(currentUser.id, newPin);
+      if (ok) {
+        triggerHaptic('success');
+        setPinSuccess('Code PIN mis à jour avec succès !');
+        setNewPin('');
+        setConfirmPin('');
+        setTimeout(() => {
+          setPinSuccess('');
+          setShowChangePinForm(false);
+        }, 2000);
+      } else {
+        triggerHaptic('error');
+        setPinError('Erreur lors de la mise à jour du code PIN.');
+      }
+    } catch (err) {
+      console.error(err);
+      triggerHaptic('error');
+      setPinError('Erreur lors de la mise à jour du code PIN.');
+    } finally {
+      setIsSavingPin(false);
+    }
   };
 
   const roleLabel = currentUser?.role === 'ADMINISTRATEUR' ? 'Administrateur'

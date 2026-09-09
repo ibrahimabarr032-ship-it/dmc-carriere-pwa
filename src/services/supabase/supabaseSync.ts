@@ -29,6 +29,106 @@ export interface SyncResult {
 }
 
 /**
+ * Synchronise immédiatement la modification du code PIN d'un utilisateur vers IndexedDB et Supabase.
+ */
+export const syncUserPinToSupabase = async (userId: string, newPin: string): Promise<void> => {
+  // 1. Mise à jour IndexedDB locale
+  await db.users.update(userId, { pinCode: newPin });
+
+  // 2. Mise à jour distante Supabase si connecté
+  const client = getSupabaseClient();
+  if (client) {
+    try {
+      const { error: err1 } = await client
+        .from('users')
+        .update({ pinCode: newPin, pin_code: newPin })
+        .eq('id', userId);
+
+      if (err1) {
+        await client
+          .from('user_accounts')
+          .update({ pin_code: newPin, pinCode: newPin })
+          .eq('id', userId);
+      }
+    } catch (err) {
+      console.warn('Avertissement mise à jour PIN Supabase:', err);
+    }
+  }
+};
+
+/**
+ * Synchronise un compte utilisateur créé ou modifié vers Supabase.
+ */
+export const syncUserAccountToSupabase = async (user: UserAccount): Promise<void> => {
+  const client = getSupabaseClient();
+  if (!client) return;
+  try {
+    const payload = {
+      id: user.id,
+      fullName: user.fullName,
+      full_name: user.fullName,
+      role: user.role,
+      pinCode: user.pinCode,
+      pin_code: user.pinCode,
+      avatarColor: user.avatarColor || '#10b981',
+      avatar_color: user.avatarColor || '#10b981',
+      isActive: user.isActive !== undefined ? user.isActive : true,
+      is_active: user.isActive !== undefined ? user.isActive : true,
+      phone: user.phone || null,
+      siteName: user.siteName || 'DMC Carrière',
+      site_name: user.siteName || 'DMC Carrière'
+    };
+    const { error } = await client.from('users').upsert([payload], { onConflict: 'id' });
+    if (error) {
+      await client.from('user_accounts').upsert([payload], { onConflict: 'id' });
+    }
+  } catch (err) {
+    console.warn('Avertissement sync utilisateur Supabase:', err);
+  }
+};
+
+/**
+ * Synchronise un modèle de camion vers Supabase.
+ */
+export const syncTruckModelToSupabase = async (truck: TruckModel): Promise<void> => {
+  const client = getSupabaseClient();
+  if (!client) return;
+  try {
+    const payload = {
+      id: truck.id,
+      name: truck.name,
+      axleCount: truck.axleCount || 3,
+      axle_count: truck.axleCount || 3,
+      defaultPriceGNF: Number(truck.defaultPriceGNF || 0),
+      default_price_gnf: Number(truck.defaultPriceGNF || 0),
+      iconType: truck.iconType || 'medium',
+      icon_type: truck.iconType || 'medium',
+      isActive: truck.isActive !== undefined ? truck.isActive : true,
+      is_active: truck.isActive !== undefined ? truck.isActive : true,
+      displayOrder: truck.displayOrder || 1,
+      display_order: truck.displayOrder || 1,
+      taxes: truck.taxes || []
+    };
+    await client.from('truck_models').upsert([payload], { onConflict: 'id' });
+  } catch (err) {
+    console.warn('Avertissement sync camion Supabase:', err);
+  }
+};
+
+/**
+ * Supprime un modèle de camion dans Supabase.
+ */
+export const deleteTruckModelFromSupabase = async (truckId: string): Promise<void> => {
+  const client = getSupabaseClient();
+  if (!client) return;
+  try {
+    await client.from('truck_models').delete().eq('id', truckId);
+  } catch (err) {
+    console.warn('Avertissement suppression camion Supabase:', err);
+  }
+};
+
+/**
  * Exécute la synchronisation bidirectionnelle complète entre la base locale Dexie (IndexedDB)
  * et la base distante Supabase (PostgreSQL).
  * 
@@ -64,23 +164,21 @@ export const syncAllDataWithSupabase = async (): Promise<SyncResult> => {
   }
 
   try {
-    // 1. PUSH & PULL USERS (Table 'users' dans Supabase)
-    const localUsers = await db.users.toArray();
-    if (localUsers.length > 0) {
-      const userPayload = localUsers.map(u => ({
-        id: u.id,
-        fullName: u.fullName,
-        role: u.role,
-        pinCode: u.pinCode,
-        avatarColor: u.avatarColor || '#10b981',
-        isActive: u.isActive !== undefined ? u.isActive : true,
-        phone: u.phone || null,
-        siteName: u.siteName || 'DMC Carrière'
-      }));
-      await client.from('users').upsert(userPayload, { onConflict: 'id' });
+    // 1. PULL USERS EN PRIORITÉ DEPUIS SUPABASE (Source de vérité pour les PIN modifiés)
+    let remoteUsers: any[] | null = null;
+    let usersErr = null;
+    const resUsers = await client.from('users').select('*');
+    if (resUsers.error) {
+      const resAccounts = await client.from('user_accounts').select('*');
+      if (!resAccounts.error && resAccounts.data) {
+        remoteUsers = resAccounts.data;
+      } else {
+        usersErr = resUsers.error;
+      }
+    } else {
+      remoteUsers = resUsers.data;
     }
 
-    const { data: remoteUsers, error: usersErr } = await client.from('users').select('*');
     if (!usersErr && remoteUsers && remoteUsers.length > 0) {
       const usersToPut: UserAccount[] = remoteUsers.map(ru => ({
         id: ru.id,
@@ -90,28 +188,29 @@ export const syncAllDataWithSupabase = async (): Promise<SyncResult> => {
         avatarColor: ru.avatarColor || ru.avatar_color || '#10b981',
         phone: ru.phone,
         siteName: ru.siteName || ru.site_name || 'DMC Carrière',
-        isActive: ru.isActive !== undefined ? ru.isActive : true
+        isActive: ru.isActive !== undefined ? ru.isActive : (ru.is_active !== undefined ? ru.is_active : true)
       }));
       await db.users.bulkPut(usersToPut);
       stats.pulledUsers = remoteUsers.length;
+    } else if (!usersErr && (!remoteUsers || remoteUsers.length === 0)) {
+      // Si la table distante est vierge, on envoie les utilisateurs locaux par défaut
+      const localUsers = await db.users.toArray();
+      if (localUsers.length > 0) {
+        const userPayload = localUsers.map(u => ({
+          id: u.id,
+          fullName: u.fullName,
+          role: u.role,
+          pinCode: u.pinCode,
+          avatarColor: u.avatarColor || '#10b981',
+          isActive: u.isActive !== undefined ? u.isActive : true,
+          phone: u.phone || null,
+          siteName: u.siteName || 'DMC Carrière'
+        }));
+        await client.from('users').upsert(userPayload, { onConflict: 'id' });
+      }
     }
 
-    // 2. PUSH & PULL TRUCK MODELS / TARIFS DYNAMIQUES (Table 'truck_models')
-    const localTrucks = await db.truckModels.toArray();
-    if (localTrucks.length > 0) {
-      const truckPayload = localTrucks.map(t => ({
-        id: t.id,
-        name: t.name,
-        axleCount: t.axleCount || 3,
-        defaultPriceGNF: Number(t.defaultPriceGNF || 0),
-        iconType: t.iconType || 'medium',
-        isActive: t.isActive !== undefined ? t.isActive : true,
-        displayOrder: t.displayOrder || 1,
-        taxes: t.taxes || []
-      }));
-      await client.from('truck_models').upsert(truckPayload, { onConflict: 'id' });
-    }
-
+    // 2. PULL TRUCK MODELS EN PRIORITÉ DEPUIS SUPABASE
     const { data: remoteTrucks, error: trucksErr } = await client.from('truck_models').select('*');
     if (!trucksErr && remoteTrucks && remoteTrucks.length > 0) {
       const trucksToPut: TruckModel[] = remoteTrucks.map(rt => ({
@@ -126,6 +225,22 @@ export const syncAllDataWithSupabase = async (): Promise<SyncResult> => {
       }));
       await db.truckModels.bulkPut(trucksToPut);
       stats.pulledTrucks = remoteTrucks.length;
+    } else if (!trucksErr && (!remoteTrucks || remoteTrucks.length === 0)) {
+      // Si la table camions distante est vierge, on envoie les camions locaux
+      const localTrucks = await db.truckModels.toArray();
+      if (localTrucks.length > 0) {
+        const truckPayload = localTrucks.map(t => ({
+          id: t.id,
+          name: t.name,
+          axleCount: t.axleCount || 3,
+          defaultPriceGNF: Number(t.defaultPriceGNF || 0),
+          iconType: t.iconType || 'medium',
+          isActive: t.isActive !== undefined ? t.isActive : true,
+          displayOrder: t.displayOrder || 1,
+          taxes: t.taxes || []
+        }));
+        await client.from('truck_models').upsert(truckPayload, { onConflict: 'id' });
+      }
     }
 
     // 3. PUSH LOCAL LOADINGS TO SUPABASE (Table 'loadings')

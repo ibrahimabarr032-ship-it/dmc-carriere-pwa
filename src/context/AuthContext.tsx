@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, seedDefaultLocalData } from '../services/db/localDb';
-import { syncAllDataWithSupabase } from '../services/supabase/supabaseSync';
+import { syncAllDataWithSupabase, syncUserPinToSupabase } from '../services/supabase/supabaseSync';
 import { UserAccount, UserRole } from '../types/domain';
 
 /**
@@ -12,6 +12,7 @@ interface AuthContextType {
   users: UserAccount[];
   isLoading: boolean;
   loginWithPin: (userId: string, pin: string) => Promise<boolean>;
+  updateUserPin: (userId: string, newPin: string) => Promise<boolean>;
   switchUserRole: (role: UserRole) => void;
   logout: () => void;
   activeRole: UserRole;
@@ -70,6 +71,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return false;
   }, [setCurrentUser, setActiveRole]);
 
+  const updateUserPin = useCallback(async (userId: string, newPin: string): Promise<boolean> => {
+    try {
+      await syncUserPinToSupabase(userId, newPin);
+      setCurrentUser(prev => (prev && prev.id === userId ? { ...prev, pinCode: newPin } : prev));
+      return true;
+    } catch (err) {
+      console.error('Erreur lors de la mise à jour du PIN:', err);
+      return false;
+    }
+  }, []);
+
   const switchUserRole = useCallback((role: UserRole) => {
     setActiveRole(role);
     const matchedUser = allUsers.find(u => u.role === role);
@@ -87,11 +99,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     users: allUsers,
     isLoading,
     loginWithPin,
+    updateUserPin,
     switchUserRole,
     logout,
     activeRole,
     setActiveRole
-  }), [currentUser, allUsers, isLoading, loginWithPin, switchUserRole, logout, activeRole, setActiveRole]);
+  }), [currentUser, allUsers, isLoading, loginWithPin, updateUserPin, switchUserRole, logout, activeRole, setActiveRole]);
 
   return (
     <AuthContext.Provider value={contextValue}>
