@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../services/db/localDb';
+import { db, seedDefaultLocalData } from '../services/db/localDb';
 import { syncAllDataWithSupabase } from '../services/supabase/supabaseSync';
 import { UserAccount, UserRole } from '../types/domain';
 
@@ -37,7 +37,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     async function init() {
-      // Sync from Supabase to fetch real users and trucks
+      // 1. Initialise immédiatement les profils locaux par défaut si premier lancement
+      await seedDefaultLocalData();
+      // 2. Tente de synchroniser avec Supabase pour récupérer les mises à jour distantes
       await syncAllDataWithSupabase();
       setIsLoading(false);
     }
