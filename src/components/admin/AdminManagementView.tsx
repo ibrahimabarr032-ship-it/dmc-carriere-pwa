@@ -270,14 +270,14 @@ export const AdminManagementView: React.FC = () => {
 
 
   return (
-    <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.75rem 1.25rem 3.5rem' }}>
+    <div className="page-container">
       
       {/* 1. Header (CAARUD RDS Style) */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#0f172a' }}>
-          Administration & Direction
+      <div style={{ marginBottom: '1.25rem' }}>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#0f172a' }}>
+          Administration &amp; Direction
         </h1>
-        <p style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.2rem' }}>
+        <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.2rem' }}>
           Configuration globale du catalogue des camions et gestion des intervenants de l'équipe.
         </p>
       </div>
@@ -287,11 +287,11 @@ export const AdminManagementView: React.FC = () => {
         display: 'flex',
         gap: '0.5rem',
         backgroundColor: '#ffffff',
-        padding: '0.4rem',
+        padding: '0.35rem',
         borderRadius: 'var(--radius-xl)',
         border: '1px solid #e2e8f0',
-        width: 'fit-content',
-        marginBottom: '2rem',
+        width: '100%',
+        marginBottom: '1.5rem',
         flexWrap: 'wrap'
       }}>
         {[
@@ -308,21 +308,23 @@ export const AdminManagementView: React.FC = () => {
                 setActiveTab(tab.id as typeof activeTab);
               }}
               style={{
+                flex: '1 1 auto',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.65rem 1.15rem',
+                justifyContent: 'center',
+                gap: '0.45rem',
+                padding: '0.6rem 1rem',
                 borderRadius: 'var(--radius-lg)',
                 border: 'none',
                 backgroundColor: isActive ? '#ecfdf5' : 'transparent',
                 color: isActive ? '#047857' : '#64748b',
-                fontSize: '0.88rem',
+                fontSize: '0.85rem',
                 fontWeight: isActive ? 800 : 600,
                 cursor: 'pointer',
-                transition: 'background-color 0.15s ease, color 0.15s ease'
+                transition: 'all 0.15s ease'
               }}
             >
-              <Icon size={17} color={isActive ? '#059669' : '#94a3b8'} />
+              <Icon size={16} color={isActive ? '#059669' : '#94a3b8'} />
               <span>{tab.label}</span>
             </button>
           );
@@ -331,7 +333,7 @@ export const AdminManagementView: React.FC = () => {
 
       {/* TAB 1: CATALOGUE DES MODÈLES DE CAMIONS */}
       {activeTab === 'trucks' && (
-        <div className="clean-card" style={{ padding: '1.75rem' }}>
+        <div className="clean-card" style={{ padding: '1.25rem' }}>
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',

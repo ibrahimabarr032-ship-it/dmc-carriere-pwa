@@ -63,7 +63,7 @@ function AppContent() {
       <footer style={{
         backgroundColor: '#ffffff',
         borderTop: '1px solid #e2e8f0',
-        padding: '1.25rem 1rem',
+        padding: '1.25rem 1rem calc(4.5rem + env(safe-area-inset-bottom, 16px))',
         fontSize: '0.8rem',
         color: '#64748b'
       }}>
