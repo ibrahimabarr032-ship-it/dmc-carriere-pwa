@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="dmcGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="50%" stop-color="#EAB308" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+    <linearGradient id="dmcEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+  </defs>
+  <!-- Background Shield -->
+  <polygon points="50,5 92,24 92,62 50,95 8,62 8,24" fill="#0D1914" stroke="url(#dmcGold)" stroke-width="3"/>
+  <!-- Mining Diamond / Quarry Pick Graphic -->
+  <path d="M50 18 L76 38 L50 82 L24 38 Z" fill="url(#dmcEmerald)" opacity="0.85"/>
+  <path d="M50 18 L64 38 L50 68 L36 38 Z" fill="url(#dmcGold)"/>
+  <!-- DMC Monogram -->
+  <text x="50" y="58" font-family="'Outfit', sans-serif" font-weight="900" font-size="20" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">DMC</text>
+  <text x="50" y="74" font-family="'Inter', sans-serif" font-weight="700" font-size="7" fill="#F59E0B" text-anchor="middle" letter-spacing="2">CARRIERE SABLE</text>
+</svg>

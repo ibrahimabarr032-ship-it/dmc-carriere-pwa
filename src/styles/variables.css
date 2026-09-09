@@ -1,0 +1,100 @@
+:root {
+  /* ----------------------------------------------------
+     CAARUD RDS / DMC LUXE CLEAN & MODERN COLOR PALETTE
+     ---------------------------------------------------- */
+  
+  /* Backgrounds */
+  --bg-app: #f4fbf7;
+  --bg-app-gradient: linear-gradient(180deg, #edfdf5 0%, #f8fafc 40%, #f1f5f9 100%);
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  --bg-surface: #f8fafc;
+  --bg-surface-elevated: #ffffff;
+
+  /* Primary Emerald Green (Clean, Fresh, Modern) */
+  --emerald-50: #ecfdf5;
+  --emerald-100: #d1fae5;
+  --emerald-200: #a7f3d0;
+  --emerald-300: #6ee7b7;
+  --emerald-400: #34d399;
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --emerald-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --emerald-glow: 0 4px 14px rgba(16, 185, 129, 0.22);
+
+  /* Gold & Amber Accents */
+  --gold-50: #fffbeb;
+  --gold-100: #fef3c7;
+  --gold-200: #fde68a;
+  --gold-500: #d97706;
+  --gold-600: #b45309;
+  --gold-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+
+  /* Pastel Tag & Metric Tile Palettes */
+  --tag-green-bg: #dcfce7;
+  --tag-green-text: #15803d;
+  --tag-green-border: #bbf7d0;
+
+  --tag-blue-bg: #e0f2fe;
+  --tag-blue-text: #0369a1;
+  --tag-blue-border: #bae6fd;
+
+  --tag-purple-bg: #f3e8ff;
+  --tag-purple-text: #7e22ce;
+  --tag-purple-border: #e9d5ff;
+
+  --tag-amber-bg: #fef3c7;
+  --tag-amber-text: #b45309;
+  --tag-amber-border: #fde68a;
+
+  --tag-red-bg: #fee2e2;
+  --tag-red-text: #b91c1c;
+  --tag-red-border: #fecaca;
+
+  --tag-gray-bg: #f1f5f9;
+  --tag-gray-text: #475569;
+  --tag-gray-border: #e2e8f0;
+
+  /* Functional Status */
+  --danger: #ef4444;
+  --danger-surface: #fef2f2;
+  --warning: #f59e0b;
+  --warning-surface: #fffbeb;
+  --info: #0284c7;
+  --info-surface: #f0f9ff;
+  --success: #10b981;
+  --success-surface: #ecfdf5;
+
+  /* Typography */
+  --text-main: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-dim: #94a3b8;
+  --text-inverse: #ffffff;
+  --text-emerald: #059669;
+
+  /* Borders & Dividers */
+  --border-subtle: #e2e8f0;
+  --border-light: #f1f5f9;
+  --border-active: #10b981;
+
+  /* Clean Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.05), 0 4px 10px -2px rgba(0, 0, 0, 0.02);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.03);
+
+  /* Radius (Smooth Rounded Feel) */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Touch Ergonomics */
+  --min-touch-target: 48px;
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
