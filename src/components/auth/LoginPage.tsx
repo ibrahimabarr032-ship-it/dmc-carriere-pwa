@@ -8,7 +8,7 @@ import {
 
 import { db } from '../../services/db/localDb';
 export const LoginPage: React.FC = () => {
-  const { users, loginWithPin } = useAuth();
+  const { users, loginWithPin, updateUserPin } = useAuth();
   const { triggerHaptic } = useHaptic();
 
   const [activeTab, setActiveTab] = useState<'EQUIPE' | 'DIRECTION'>('EQUIPE');
@@ -52,11 +52,23 @@ export const LoginPage: React.FC = () => {
     setErrorMsg('');
 
     try {
-      // Intercept default PIN "0000" for forced change
+      const user = await db.users.get(selectedUserId);
+      if (!user) {
+        setErrorMsg('Profil utilisateur introuvable.');
+        return;
+      }
+
+      // Si l'utilisateur tape 0000 :
+      // On n'ouvre la modale de configuration du mot de passe QUE si son code PIN actuel en base est 0000.
+      // S'il a déjà changé son code PIN auparavant, 0000 doit être rejeté comme code PIN incorrect !
       if (pin === '0000') {
-        const user = await db.users.get(selectedUserId);
-        if (user && user.pinCode === '0000') {
+        if (user.pinCode === '0000') {
           setShowChangePinModal(true);
+          return;
+        } else {
+          triggerHaptic('error');
+          setErrorMsg('Code PIN incorrect. Vérifiez vos identifiants.');
+          setPin('');
           return;
         }
       }
@@ -92,7 +104,11 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(true);
     setErrorMsg('');
     try {
-      await db.users.update(selectedUserId, { pinCode: newPin });
+      const updated = await updateUserPin(selectedUserId, newPin);
+      if (!updated) {
+        setErrorMsg('Erreur lors de la mise à jour du code PIN.');
+        return;
+      }
       const success = await loginWithPin(selectedUserId, newPin);
       
       if (success) {
