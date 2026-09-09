@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 
 import { db } from '../../services/db/localDb';
+import { syncAllDataWithSupabase } from '../../services/supabase/supabaseSync';
+
 export const LoginPage: React.FC = () => {
   const { users, loginWithPin, updateUserPin } = useAuth();
   const { triggerHaptic } = useHaptic();
@@ -27,6 +29,10 @@ export const LoginPage: React.FC = () => {
   const [newPin, setNewPin] = useState<string>('');
   const [confirmNewPin, setConfirmNewPin] = useState<string>('');
   const [showNewPin, setShowNewPin] = useState<boolean>(false);
+
+  useEffect(() => {
+    syncAllDataWithSupabase();
+  }, []);
 
   useEffect(() => {
     const list = users.filter(u =>

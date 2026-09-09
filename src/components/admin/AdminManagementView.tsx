@@ -20,11 +20,12 @@ import {
   Edit2,
   Save,
   X,
-  ChevronRight
+  ChevronRight,
+  KeyRound
 } from 'lucide-react';
 
 export const AdminManagementView: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, resetUserPin, deleteUser } = useAuth();
   const { triggerHaptic } = useHaptic();
 
   // Sub-tabs: 'trucks' | 'users'
@@ -230,6 +231,38 @@ export const AdminManagementView: React.FC = () => {
     setTimeout(() => setUserCreatedMsg(''), 6000);
 
     setNewUserName('');
+  };
+
+  const handleResetUserPin = async (user: UserAccount) => {
+    if (confirm(`Voulez-vous réinitialiser le code PIN de "${user.fullName}" à 0000 ?\n\nL'utilisateur devra obligatoirement définir un nouveau mot de passe à 4 chiffres lors de sa prochaine connexion.`)) {
+      triggerHaptic('success');
+      const ok = await resetUserPin(user.id);
+      if (ok) {
+        setUserCreatedMsg(`Code PIN de ${user.fullName} réinitialisé à 0000.`);
+        setTimeout(() => setUserCreatedMsg(''), 5000);
+      } else {
+        triggerHaptic('error');
+        alert('Erreur lors de la réinitialisation du code PIN.');
+      }
+    }
+  };
+
+  const handleDeleteUser = async (user: UserAccount) => {
+    if (currentUser?.id === user.id) {
+      alert('Vous ne pouvez pas supprimer votre propre compte actuellement connecté.');
+      return;
+    }
+    if (confirm(`Êtes-vous sûr de vouloir supprimer définitivement le collaborateur "${user.fullName}" ?\n\nCette action supprimera son accès sur tous les appareils.`)) {
+      triggerHaptic('warning');
+      const ok = await deleteUser(user.id);
+      if (ok) {
+        setUserCreatedMsg(`Le collaborateur ${user.fullName} a été supprimé avec succès.`);
+        setTimeout(() => setUserCreatedMsg(''), 5000);
+      } else {
+        triggerHaptic('error');
+        alert('Erreur lors de la suppression du compte.');
+      }
+    }
   };
 
 
@@ -568,15 +601,62 @@ export const AdminManagementView: React.FC = () => {
                       <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
                         {user.fullName}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                        PIN : **** • {user.phone || 'Non renseigné'}
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span>PIN : {user.pinCode === '0000' ? <strong style={{ color: '#d97706' }}>0000 (Initial)</strong> : '••••'}</span>
+                        <span>•</span>
+                        <span>{user.phone || 'Non renseigné'}</span>
                       </div>
                     </div>
                   </div>
 
-                  <span className={`badge ${user.role === 'ADMINISTRATEUR' ? 'badge-purple' : user.role === 'PROPRIETAIRE' ? 'badge-blue' : 'badge-mint'}`}>
-                    {user.role}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    <span className={`badge ${user.role === 'ADMINISTRATEUR' ? 'badge-purple' : user.role === 'PROPRIETAIRE' ? 'badge-blue' : 'badge-mint'}`}>
+                      {user.role}
+                    </span>
+
+                    {currentUser?.role !== 'PROPRIETAIRE' && (
+                      <div style={{ display: 'flex', gap: '0.35rem' }}>
+                        <button
+                          type="button"
+                          title="Réinitialiser le code PIN à 0000"
+                          onClick={() => handleResetUserPin(user)}
+                          className="btn-outline"
+                          style={{
+                            padding: '0.4rem 0.65rem',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
+                            color: '#0284c7',
+                            borderColor: '#bae6fd',
+                            backgroundColor: '#f0f9ff'
+                          }}
+                        >
+                          <KeyRound size={13} />
+                          <span>Réinit. PIN (0000)</span>
+                        </button>
+
+                        {currentUser?.id !== user.id && (
+                          <button
+                            type="button"
+                            aria-label={`Supprimer ${user.fullName}`}
+                            title="Supprimer ce collaborateur"
+                            onClick={() => handleDeleteUser(user)}
+                            className="btn-outline"
+                            style={{
+                              padding: '0.4rem 0.55rem',
+                              color: '#dc2626',
+                              borderColor: '#fecaca',
+                              backgroundColor: '#fef2f2'
+                            }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

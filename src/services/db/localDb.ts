@@ -67,39 +67,12 @@ export async function seedDefaultLocalData(): Promise<void> {
   if (userCount === 0) {
     await db.users.bulkPut([
       {
-        id: 'usr_admin_1',
-        fullName: 'Ibrahim Barry (Super-Admin)',
+        id: 'admin_1',
+        fullName: 'Bella',
         role: 'ADMINISTRATEUR',
         pinCode: '0000',
-        avatarColor: '#10b981',
-        siteName: 'Direction Générale DMC',
-        isActive: true
-      },
-      {
-        id: 'usr_owner_1',
-        fullName: 'Directeur / Propriétaire DMC',
-        role: 'PROPRIETAIRE',
-        pinCode: '9999',
         avatarColor: '#3b82f6',
-        siteName: 'Carrière Boussoura',
-        isActive: true
-      },
-      {
-        id: 'usr_agent_1',
-        fullName: 'Mamadou Diallo (Pointeur Jour)',
-        role: 'AGENT_TERRAIN',
-        pinCode: '1234',
-        avatarColor: '#059669',
-        siteName: 'Carrière Boussoura',
-        isActive: true
-      },
-      {
-        id: 'usr_agent_2',
-        fullName: 'Aboubacar Soumah (Pointeur Nuit)',
-        role: 'AGENT_TERRAIN',
-        pinCode: '5678',
-        avatarColor: '#6366f1',
-        siteName: 'Carrière Boussoura',
+        siteName: 'DMC Carrière',
         isActive: true
       }
     ]);
@@ -109,40 +82,54 @@ export async function seedDefaultLocalData(): Promise<void> {
   if (truckCount === 0) {
     await db.truckModels.bulkPut([
       {
-        id: 'trk_6roues',
-        name: '6 Roues (Standard)',
-        defaultPriceGNF: 350000,
+        id: 'trk_6_roues',
+        name: '6 Roues Standard',
+        defaultPriceGNF: 250000,
         axleCount: 2,
         iconType: 'small',
         isActive: true,
-        displayOrder: 1
+        displayOrder: 1,
+        taxes: []
       },
       {
-        id: 'trk_10roues',
-        name: '10 Roues (Sinotruk Howo)',
-        defaultPriceGNF: 650000,
+        id: 'trk_10_roues_howo',
+        name: '10 Roues Sinotruk Howo',
+        defaultPriceGNF: 450000,
         axleCount: 3,
         iconType: 'medium',
         isActive: true,
-        displayOrder: 2
+        displayOrder: 2,
+        taxes: []
       },
       {
-        id: 'trk_12roues',
-        name: '12 Roues (Heavy European)',
-        defaultPriceGNF: 900000,
+        id: 'trk_12_roues_eu',
+        name: '12 Roues Heavy European',
+        defaultPriceGNF: 600000,
         axleCount: 4,
         iconType: 'heavy',
         isActive: true,
-        displayOrder: 3
+        displayOrder: 3,
+        taxes: []
       },
       {
-        id: 'trk_remorque',
-        name: 'Remorque / Semi (40t+)',
-        defaultPriceGNF: 1400000,
-        axleCount: 5,
-        iconType: 'extra_heavy',
+        id: 'trk_1788542725523',
+        name: '14 Roues Semi-Remorque',
+        defaultPriceGNF: 750000,
+        axleCount: 4,
+        iconType: 'heavy',
         isActive: true,
-        displayOrder: 4
+        displayOrder: 4,
+        taxes: []
+      },
+      {
+        id: 'trk_1788545286363_dj2',
+        name: 'Benne Semi-Remorque 16 Roues',
+        defaultPriceGNF: 850000,
+        axleCount: 5,
+        iconType: 'heavy',
+        isActive: true,
+        displayOrder: 5,
+        taxes: []
       }
     ]);
   }
