@@ -343,149 +343,179 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
     : '#86efac';
 
   return (
-    <header style={{
-      backgroundColor: '#ffffff',
-      borderBottom: '1px solid #e2e8f0',
-      position: 'sticky',
-      top: 0,
-      zIndex: 100,
-      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)'
-    }}>
-      <div style={{
-        maxWidth: '1280px',
-        margin: '0 auto',
-        padding: '0 1.25rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        minHeight: '64px',
-        gap: '1rem'
+    <>
+      {/* ── Top Sticky Header ────────────────────────────────────────────── */}
+      <header style={{
+        backgroundColor: '#ffffff',
+        borderBottom: '1px solid #e2e8f0',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
+        width: '100%'
       }}>
+        <div style={{
+          maxWidth: '1280px',
+          margin: '0 auto',
+          padding: '0 0.85rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          minHeight: '58px',
+          gap: '0.5rem'
+        }}>
 
-        {/* 1. Left: Brand */}
-        <button
-          onClick={() => handleTabClick('terrain')}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '0.75rem',
-            cursor: 'pointer', userSelect: 'none', background: 'none', border: 'none', padding: 0
-          }}
-        >
-          <div style={{
-            width: '38px', height: '38px', borderRadius: '10px',
-            backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#059669'
-          }}>
-            <Layers size={22} />
-          </div>
-          <div>
+          {/* 1. Left: Brand */}
+          <button
+            onClick={() => handleTabClick('terrain')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.55rem',
+              cursor: 'pointer', userSelect: 'none', background: 'none', border: 'none', padding: '0.25rem 0'
+            }}
+          >
             <div style={{
-              fontSize: '1.2rem', fontWeight: 900, letterSpacing: '-0.02em',
-              lineHeight: 1.1, color: '#0f172a'
+              width: '34px', height: '34px', borderRadius: '10px',
+              backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#059669',
+              flexShrink: 0
             }}>
-              DMC <span style={{ color: '#10b981' }}>CARRIÈRE</span>
+              <Layers size={19} />
+            </div>
+            <div style={{ textAlign: 'left' }}>
+              <div style={{
+                fontSize: '1.08rem', fontWeight: 900, letterSpacing: '-0.02em',
+                lineHeight: 1.1, color: '#0f172a', whiteSpace: 'nowrap'
+              }}>
+                DMC <span style={{ color: '#10b981' }}>CARRIÈRE</span>
+              </div>
+            </div>
+          </button>
+
+          {/* 2. Center: Desktop Nav Tabs (Hidden on mobile) */}
+          <nav className="desktop-only" style={{ alignItems: 'center', gap: '0.25rem', height: '58px' }}>
+            {[
+              { id: 'terrain' as const, label: 'Saisie Terrain', Icon: Layers },
+              { id: 'owner' as const, label: 'Rapports & Stats', Icon: BarChart3 },
+              { id: 'admin' as const, label: 'Administration', Icon: Settings },
+            ].filter(tab => {
+              if (currentUser?.role === 'AGENT_TERRAIN' && tab.id !== 'terrain') return false;
+              return true;
+            }).map(({ id, label, Icon }) => (
+              <button
+                key={id}
+                onClick={() => handleTabClick(id)}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.45rem',
+                  height: '58px', padding: '0 1rem', border: 'none', background: 'transparent',
+                  fontSize: '0.9rem',
+                  fontWeight: activeTab === id ? 800 : 600,
+                  color: activeTab === id ? '#0f172a' : '#64748b',
+                  borderBottom: activeTab === id ? '3px solid #10b981' : '3px solid transparent',
+                  cursor: 'pointer', transition: 'all 0.15s ease'
+                }}
+              >
+                <Icon size={17} color={activeTab === id ? '#10b981' : '#94a3b8'} />
+                <span>{label}</span>
+              </button>
+            ))}
+          </nav>
+
+          {/* 3. Right: Sync Pill + Account Avatar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+
+            {/* Cloud Sync Pill */}
+            <button
+              onClick={handleManualSync}
+              title={isOnline ? 'Connecté au Cloud (cliquer pour synchroniser)' : 'Mode Hors-ligne'}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                padding: '0.3rem 0.6rem', borderRadius: 'var(--radius-full)',
+                backgroundColor: isOnline ? '#f0fdf4' : '#fffbeb',
+                border: isOnline ? '1px solid #bbf7d0' : '1px solid #fde68a',
+                color: isOnline ? '#15803d' : '#b45309',
+                fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s ease'
+              }}
+            >
+              {isOnline ? (
+                <>
+                  <Cloud size={14} color="#16a34a" />
+                  <span className="hide-on-mobile">
+                    {isSyncing ? 'Sync...' : totalPending > 0 ? `${totalPending} en attente` : 'En ligne'}
+                  </span>
+                  {totalPending > 0 && <RefreshCw size={12} className={isSyncing ? 'animate-spin' : ''} />}
+                </>
+              ) : (
+                <>
+                  <CloudOff size={14} color="#d97706" />
+                  <span className="hide-on-mobile">Hors-ligne</span>
+                </>
+              )}
+            </button>
+
+            {/* Avatar + Account Dropdown */}
+            <div ref={accountMenuRef} style={{ position: 'relative' }}>
+              <button
+                onClick={() => {
+                  triggerHaptic('tap');
+                  setIsAccountMenuOpen(prev => !prev);
+                }}
+                title={`${currentUser?.fullName} — Gérer mon compte`}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.35rem',
+                  padding: '0.25rem 0.5rem 0.25rem 0.25rem',
+                  borderRadius: '999px',
+                  backgroundColor: avatarBg,
+                  border: `1.5px solid ${avatarBorder}`,
+                  cursor: 'pointer', transition: 'all 0.15s ease',
+                  boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
+                }}
+              >
+                <div style={{
+                  width: '28px', height: '28px', borderRadius: '50%',
+                  background: `linear-gradient(135deg, ${avatarColor}, ${avatarColor}bb)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '0.75rem', fontWeight: 900, color: '#fff',
+                  flexShrink: 0
+                }}>
+                  {getInitials(currentUser?.fullName)}
+                </div>
+                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: avatarColor, maxWidth: '75px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {currentUser?.fullName?.split(' ')[0]}
+                </span>
+                <ChevronDown size={13} color={avatarColor} style={{ transform: isAccountMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
+              </button>
+
+              {isAccountMenuOpen && (
+                <AccountMenu onClose={() => setIsAccountMenuOpen(false)} />
+              )}
             </div>
           </div>
-        </button>
+        </div>
+      </header>
 
-        {/* 2. Center: Nav Tabs */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', height: '64px' }}>
-          {[
-            { id: 'terrain' as const, label: 'Saisie Terrain', Icon: Layers },
-            { id: 'owner' as const, label: 'Rapports & Stats', Icon: BarChart3 },
-            { id: 'admin' as const, label: 'Administration', Icon: Settings },
-          ].filter(tab => {
-            if (currentUser?.role === 'AGENT_TERRAIN' && tab.id !== 'terrain') return false;
-            return true;
-          }).map(({ id, label, Icon }) => (
+      {/* ── Native Mobile Bottom Navigation Bar ────────────────────────────── */}
+      <nav className="mobile-bottom-nav">
+        {[
+          { id: 'terrain' as const, label: 'Saisie', Icon: Layers },
+          { id: 'owner' as const, label: 'Rapports', Icon: BarChart3 },
+          { id: 'admin' as const, label: 'Admin', Icon: Settings },
+        ].filter(tab => {
+          if (currentUser?.role === 'AGENT_TERRAIN' && tab.id !== 'terrain') return false;
+          return true;
+        }).map(({ id, label, Icon }) => {
+          const isActive = activeTab === id;
+          return (
             <button
               key={id}
               onClick={() => handleTabClick(id)}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                height: '64px', padding: '0 1.15rem', border: 'none', background: 'transparent',
-                fontSize: '0.92rem',
-                fontWeight: activeTab === id ? 800 : 600,
-                color: activeTab === id ? '#0f172a' : '#64748b',
-                borderBottom: activeTab === id ? '3px solid #10b981' : '3px solid transparent',
-                cursor: 'pointer', transition: 'border-bottom 0.15s ease, color 0.15s ease, font-weight 0.15s ease'
-              }}
+              className={`mobile-bottom-nav-btn ${isActive ? 'active' : ''}`}
             >
-              <Icon size={18} color={activeTab === id ? '#10b981' : '#94a3b8'} />
+              <Icon size={20} color={isActive ? '#059669' : '#64748b'} />
               <span>{label}</span>
             </button>
-          ))}
-        </nav>
-
-        {/* 3. Right: Sync Pill + Account Avatar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-
-          {/* Cloud Sync Pill */}
-          <button
-            onClick={handleManualSync}
-            title={isOnline ? 'Connecté au Cloud (cliquer pour synchroniser)' : 'Mode Hors-ligne'}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.45rem',
-              padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-full)',
-              backgroundColor: isOnline ? '#f0fdf4' : '#fffbeb',
-              border: isOnline ? '1px solid #bbf7d0' : '1px solid #fde68a',
-              color: isOnline ? '#15803d' : '#b45309',
-              fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', transition: 'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease'
-            }}
-          >
-            {isOnline ? (
-              <>
-                <Cloud size={15} color="#16a34a" />
-                <span>
-                  {isSyncing ? 'Sync...' : totalPending > 0 ? `${totalPending} en attente` : 'En ligne'}
-                </span>
-                {totalPending > 0 && <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />}
-              </>
-            ) : (
-              <>
-                <CloudOff size={15} color="#d97706" />
-                <span>Hors-ligne</span>
-              </>
-            )}
-          </button>
-
-          {/* Avatar + Account Dropdown */}
-          <div ref={accountMenuRef} style={{ position: 'relative' }}>
-            <button
-              onClick={() => {
-                triggerHaptic('tap');
-                setIsAccountMenuOpen(prev => !prev);
-              }}
-              title={`${currentUser?.fullName} — Gérer mon compte`}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.45rem',
-                padding: '0.3rem 0.6rem 0.3rem 0.3rem',
-                borderRadius: '999px',
-                backgroundColor: avatarBg,
-                border: `1.5px solid ${avatarBorder}`,
-                cursor: 'pointer', transition: 'background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.06)'
-              }}
-            >
-              <div style={{
-                width: '32px', height: '32px', borderRadius: '50%',
-                background: `linear-gradient(135deg, ${avatarColor}, ${avatarColor}bb)`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '0.8rem', fontWeight: 900, color: '#fff'
-              }}>
-                {getInitials(currentUser?.fullName)}
-              </div>
-              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: avatarColor, maxWidth: '90px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {currentUser?.fullName?.split(' ')[0]}
-              </span>
-              <ChevronDown size={14} color={avatarColor} style={{ transform: isAccountMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
-            </button>
-
-            {isAccountMenuOpen && (
-              <AccountMenu onClose={() => setIsAccountMenuOpen(false)} />
-            )}
-          </div>
-        </div>
-      </div>
-    </header>
+          );
+        })}
+      </nav>
+    </>
   );
 };

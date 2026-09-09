@@ -201,7 +201,7 @@ export const FieldEntryView: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.75rem 1.25rem 3rem' }}>
+    <div className="page-container">
       
       {/* 1. Page Header */}
       <div style={{
@@ -213,15 +213,15 @@ export const FieldEntryView: React.FC = () => {
         marginBottom: '1rem'
       }}>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#0f172a' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#0f172a' }}>
             Saisie des Chargements
           </h1>
-          <p style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.2rem' }}>
+          <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.2rem' }}>
             Gérez les passages de camions et enregistrez les dépenses carburant/OPEX.
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center', width: '100%', maxWidth: 'fit-content' }}>
           {/* Bouton photo rapport — en haut, permanent */}
           {currentUser?.role !== 'PROPRIETAIRE' && (
             <button
@@ -235,8 +235,9 @@ export const FieldEntryView: React.FC = () => {
               style={{
                 backgroundColor: '#7c3aed',
                 borderRadius: 'var(--radius-full)',
-                padding: '0.65rem 1.25rem',
-                fontSize: '0.88rem'
+                padding: '0.6rem 1.1rem',
+                fontSize: '0.85rem',
+                flex: '1 1 auto'
               }}
             >
               📷 <span>Photo rapport</span>
@@ -255,19 +256,20 @@ export const FieldEntryView: React.FC = () => {
               style={{
                 backgroundColor: '#059669',
                 borderRadius: 'var(--radius-full)',
-                padding: '0.65rem 1.25rem',
-                fontSize: '0.88rem'
+                padding: '0.6rem 1.1rem',
+                fontSize: '0.85rem',
+                flex: '1 1 auto'
               }}
             >
-              <Fuel size={17} />
-              <span>+ Dépense Carburant / OPEX</span>
+              <Fuel size={16} />
+              <span>+ Dépense Carburant</span>
             </button>
           )}
         </div>
       </div>
 
       {/* Photo Rapport — toujours visible en haut */}
-      <div style={{ marginBottom: '1.5rem' }}>
+      <div style={{ marginBottom: '1.25rem' }}>
         <ReportPhotoCapture
           reportDate={entryDateStr}
           photos={dailyReport?.photos ?? []}
@@ -282,85 +284,85 @@ export const FieldEntryView: React.FC = () => {
       {/* 2. Top Metric Cards (CAARUD RDS Style) */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-        gap: '1.25rem',
-        marginBottom: '2rem'
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
+        gap: '0.85rem',
+        marginBottom: '1.5rem'
       }}>
         {/* KPI 1: Rotations */}
-        <div className="clean-card" style={{ padding: '1.25rem 1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+        <div className="clean-card" style={{ padding: '1.1rem 1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
             <div style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '12px',
+              width: '36px',
+              height: '36px',
+              borderRadius: '10px',
               backgroundColor: '#ecfdf5',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#059669'
             }}>
-              <Truck size={22} />
+              <Truck size={20} />
             </div>
             <span className="badge badge-mint">Aujourd'hui</span>
           </div>
-          <div style={{ fontSize: '2rem', fontWeight: 900, color: '#0f172a', lineHeight: 1.1 }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#0f172a', lineHeight: 1.1 }}>
             {summary.totalTrucks}
           </div>
-          <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '0.35rem' }}>
+          <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem' }}>
             Camions sortis de carrière
           </div>
         </div>
 
         {/* KPI 2: Chiffre d'Affaires Brut (CAB) */}
-        <div className="clean-card" style={{ padding: '1.25rem 1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '1.2rem' }}>💰</span>
+        <div className="clean-card" style={{ padding: '1.1rem 1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '1.1rem' }}>💰</span>
             <span className="badge badge-amber">Recette GNF</span>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#0f172a', lineHeight: 1.1 }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', lineHeight: 1.1 }}>
             {formatGNF(summary.grossRevenueGNF)}
           </div>
-          <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '0.35rem' }}>
+          <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem' }}>
             Chiffre d'affaires brut estimé
           </div>
         </div>
 
         {/* KPI 3: Taxes */}
-        <div className="clean-card" style={{ padding: '1.25rem 1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+        <div className="clean-card" style={{ padding: '1.1rem 1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
             <div style={{
-              width: '40px', height: '40px', borderRadius: '12px',
+              width: '36px', height: '36px', borderRadius: '10px',
               backgroundColor: '#fef3c7', display: 'flex',
               alignItems: 'center', justifyContent: 'center', color: '#d97706'
             }}>
-              <Receipt size={22} />
+              <Receipt size={20} />
             </div>
             <span className="badge badge-amber">Taxes</span>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#d97706', lineHeight: 1.1 }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#d97706', lineHeight: 1.1 }}>
             {summary.totalTaxesGNF > 0 ? formatGNF(summary.totalTaxesGNF) : '0 GNF'}
           </div>
-          <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '0.35rem' }}>
+          <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem' }}>
             Total taxes prélevées
           </div>
         </div>
 
         {/* KPI 4: Carburant */}
-        <div className="clean-card" style={{ padding: '1.25rem 1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+        <div className="clean-card" style={{ padding: '1.1rem 1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
             <div style={{
-              width: '40px', height: '40px', borderRadius: '12px',
+              width: '36px', height: '36px', borderRadius: '10px',
               backgroundColor: '#ecfdf5', display: 'flex',
               alignItems: 'center', justifyContent: 'center', color: '#059669'
             }}>
-              <Fuel size={22} />
+              <Fuel size={20} />
             </div>
             <span className="badge badge-mint">Carburant</span>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#0f172a', lineHeight: 1.1 }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', lineHeight: 1.1 }}>
             {summary.fuelOpexGNF > 0 ? formatGNF(summary.fuelOpexGNF) : '0 GNF'}
           </div>
-          <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '0.35rem' }}>
+          <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem' }}>
             {summary.fuelLitersTotal > 0
               ? `${summary.fuelLitersTotal.toLocaleString('fr-FR')} L consommés`
               : 'Aucun carburant enregistré'}
@@ -372,13 +374,14 @@ export const FieldEntryView: React.FC = () => {
       {/* 3. Main Workspace: Left = Saisie Rapide 2-Clics | Right = Historique Récent */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: '2rem',
-        alignItems: 'start'
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 310px), 1fr))',
+        gap: '1.25rem',
+        alignItems: 'start',
+        width: '100%'
       }}>
         
         {/* Left Column: Formulaire de Saisie */}
-        <div className="clean-card" style={{ padding: '1.75rem' }}>
+        <div className="clean-card" style={{ padding: '1.25rem' }}>
           
           {/* Date/Time picker — for retroactive entries */}
           <DateTimePicker
@@ -388,10 +391,10 @@ export const FieldEntryView: React.FC = () => {
           />
 
           <div style={{ marginBottom: '0.75rem' }}>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
               1. Sélectionner le Camion
             </h2>
-            <p style={{ fontSize: '0.82rem', color: '#64748b' }}>
+            <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
               Touchez le modèle de camion qui quitte la carrière
             </p>
           </div>
@@ -412,12 +415,12 @@ export const FieldEntryView: React.FC = () => {
           ) : (
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-              gap: '0.85rem',
-              marginBottom: '1.5rem',
-              maxHeight: '400px',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
+              gap: '0.65rem',
+              marginBottom: '1.25rem',
+              maxHeight: '380px',
               overflowY: 'auto',
-              paddingRight: '0.5rem' // to avoid scrollbar overlapping content
+              paddingRight: '0.25rem'
             }}>
               {truckModels.map(truck => {
                 const isSelected = selectedTruck?.id === truck.id;

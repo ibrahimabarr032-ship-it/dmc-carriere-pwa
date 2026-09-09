@@ -119,14 +119,14 @@ export const OwnerDashboardView: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.75rem 1.25rem 3.5rem' }}>
+    <div className="page-container">
       
       {/* 1. Page Header (CAARUD RDS Style) */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#0f172a' }}>
-          Rapports & Statistiques
+      <div style={{ marginBottom: '1.25rem' }}>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#0f172a' }}>
+          Rapports &amp; Statistiques
         </h1>
-        <p style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.2rem' }}>
+        <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.2rem' }}>
           Analysez l'activité de la carrière, consultez l'historique de l'équipe et exportez vos documents officiels.
         </p>
       </div>
@@ -134,13 +134,13 @@ export const OwnerDashboardView: React.FC = () => {
       {/* 2. Sub-Navigation Tabs */}
       <div style={{
         display: 'flex',
-        gap: '0.75rem',
+        gap: '0.5rem',
         backgroundColor: '#ffffff',
-        padding: '0.4rem',
+        padding: '0.35rem',
         borderRadius: 'var(--radius-xl)',
         border: '1px solid #e2e8f0',
         width: '100%',
-        marginBottom: '1.75rem'
+        marginBottom: '1.5rem'
       }}>
         <button
           onClick={() => {
@@ -152,23 +152,21 @@ export const OwnerDashboardView: React.FC = () => {
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '0.5rem',
-            padding: '0.65rem 1.25rem',
+            gap: '0.45rem',
+            padding: '0.6rem 0.85rem',
             borderRadius: 'var(--radius-lg)',
             border: 'none',
             backgroundColor: subTab === 'STATS' ? '#ecfdf5' : 'transparent',
             color: subTab === 'STATS' ? '#047857' : '#64748b',
-            fontSize: '0.88rem',
+            fontSize: '0.85rem',
             fontWeight: subTab === 'STATS' ? 800 : 600,
             cursor: 'pointer',
-            transition: 'background-color 0.15s ease, color 0.15s ease, font-weight 0.15s ease'
+            transition: 'all 0.15s ease'
           }}
         >
-          <BarChart2 size={17} color={subTab === 'STATS' ? '#059669' : '#94a3b8'} />
+          <BarChart2 size={16} color={subTab === 'STATS' ? '#059669' : '#94a3b8'} />
           <span>Statistiques</span>
         </button>
-
-
 
         <button
           onClick={() => {
@@ -180,24 +178,22 @@ export const OwnerDashboardView: React.FC = () => {
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '0.5rem',
-            padding: '0.65rem 1.25rem',
+            gap: '0.45rem',
+            padding: '0.6rem 0.85rem',
             borderRadius: 'var(--radius-lg)',
             border: 'none',
             backgroundColor: subTab === 'DOWNLOADS' ? '#ecfdf5' : 'transparent',
             color: subTab === 'DOWNLOADS' ? '#047857' : '#64748b',
-            fontSize: '0.88rem',
+            fontSize: '0.85rem',
             fontWeight: subTab === 'DOWNLOADS' ? 800 : 600,
             cursor: 'pointer',
-            transition: 'background-color 0.15s ease, color 0.15s ease, font-weight 0.15s ease'
+            transition: 'all 0.15s ease'
           }}
         >
-          <History size={17} color={subTab === 'DOWNLOADS' ? '#059669' : '#94a3b8'} />
+          <History size={16} color={subTab === 'DOWNLOADS' ? '#059669' : '#94a3b8'} />
           <span>Historique &amp; Téléchargements</span>
         </button>
       </div>
-
-
 
       {subTab === 'STATS' ? (
         <>
@@ -207,24 +203,25 @@ export const OwnerDashboardView: React.FC = () => {
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
-            gap: '1rem',
-            marginBottom: '1.25rem'
+            gap: '0.75rem',
+            marginBottom: '1rem'
           }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
+            <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
               Vue d'ensemble
             </h2>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', width: '100%', maxWidth: 'fit-content' }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
+                gap: '0.4rem',
                 backgroundColor: '#ffffff',
-                padding: '0.4rem 0.85rem',
+                padding: '0.35rem 0.75rem',
                 borderRadius: 'var(--radius-md)',
-                border: '1px solid #e2e8f0'
+                border: '1px solid #e2e8f0',
+                width: '100%'
               }}>
-                <Calendar size={16} color="#059669" />
+                <Calendar size={15} color="#059669" />
                 <select
                   aria-label="Période des statistiques"
                   value={statsPeriod}
@@ -237,11 +234,12 @@ export const OwnerDashboardView: React.FC = () => {
                     outline: 'none',
                     backgroundColor: 'transparent',
                     fontWeight: 700,
-                    fontSize: '0.85rem',
+                    fontSize: '0.82rem',
                     color: '#0f172a',
                     cursor: 'pointer',
                     appearance: 'auto',
-                    paddingRight: '0.5rem'
+                    paddingRight: '0.25rem',
+                    flex: 1
                   }}
                 >
                   <option value="TODAY">Aujourd'hui</option>
@@ -262,11 +260,11 @@ export const OwnerDashboardView: React.FC = () => {
                     style={{
                       border: 'none',
                       borderLeft: '1px solid #e2e8f0',
-                      paddingLeft: '0.5rem',
+                      paddingLeft: '0.4rem',
                       outline: 'none',
                       backgroundColor: 'transparent',
                       fontWeight: 700,
-                      fontSize: '0.85rem',
+                      fontSize: '0.82rem',
                       color: '#0f172a',
                       cursor: 'pointer'
                     }}
@@ -279,9 +277,10 @@ export const OwnerDashboardView: React.FC = () => {
           {/* Top 4 KPI Cards */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: '1rem',
-            marginBottom: '1.75rem'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
+            gap: '0.85rem',
+            marginBottom: '1.5rem',
+            width: '100%'
           }}>
             {/* KPI 1: Chiffre d'Affaires Brut */}
             <div className="kpi-card">
@@ -299,16 +298,16 @@ export const OwnerDashboardView: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="kpi-title">Marge Nette Réalisée</span>
                 <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '10px',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
                   backgroundColor: '#f0fdf4',
                   color: '#16a34a',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <TrendingUp size={19} />
+                  <TrendingUp size={17} />
                 </div>
               </div>
               <div className="kpi-value" style={{ color: '#16a34a' }}>
@@ -322,16 +321,16 @@ export const OwnerDashboardView: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="kpi-title">Total Camions Sortis</span>
                 <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '10px',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
                   backgroundColor: '#f0f9ff',
                   color: '#0284c7',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <Truck size={19} />
+                  <Truck size={17} />
                 </div>
               </div>
               <div className="kpi-value" style={{ color: '#0284c7' }}>
@@ -343,18 +342,18 @@ export const OwnerDashboardView: React.FC = () => {
             {/* KPI 4: Dépenses & Carburant */}
             <div className="kpi-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span className="kpi-title">Dépenses & Carburant</span>
+                <span className="kpi-title">Dépenses &amp; Carburant</span>
                 <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '10px',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
                   backgroundColor: '#fffbeb',
                   color: '#d97706',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <Fuel size={19} />
+                  <Fuel size={17} />
                 </div>
               </div>
               <div className="kpi-value" style={{ color: '#d97706' }}>
@@ -365,76 +364,76 @@ export const OwnerDashboardView: React.FC = () => {
           </div>
 
           {/* Metric Tiles Grid */}
-          <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#334155', marginBottom: '0.85rem' }}>
-              Détail des Rotations par Modèle & Frais
+          <div style={{ marginBottom: '1.75rem' }}>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#334155', marginBottom: '0.75rem' }}>
+              Détail des Rotations par Modèle &amp; Frais
             </h3>
 
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-              gap: '0.85rem'
+              gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
+              gap: '0.65rem',
+              width: '100%'
             }}>
-              <div className="clean-card" style={{ padding: '1.15rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#059669', marginBottom: '0.5rem' }}>
-                  <Truck size={17} />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>6 Roues Standard</span>
+              <div className="clean-card" style={{ padding: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#059669', marginBottom: '0.35rem' }}>
+                  <Truck size={15} />
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700 }}>6 Roues Standard</span>
                 </div>
-                <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#0f172a' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a' }}>
                   {getTruckCount('6 Roues')}
                 </div>
               </div>
 
-              <div className="clean-card" style={{ padding: '1.15rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#0284c7', marginBottom: '0.5rem' }}>
-                  <Truck size={17} />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>10 Roues Howo</span>
+              <div className="clean-card" style={{ padding: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#0284c7', marginBottom: '0.35rem' }}>
+                  <Truck size={15} />
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700 }}>10 Roues Howo</span>
                 </div>
-                <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#0f172a' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a' }}>
                   {getTruckCount('10 Roues')}
                 </div>
               </div>
 
-              <div className="clean-card" style={{ padding: '1.15rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#7c3aed', marginBottom: '0.5rem' }}>
-                  <Truck size={17} />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>12 Roues Heavy</span>
+              <div className="clean-card" style={{ padding: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#7c3aed', marginBottom: '0.35rem' }}>
+                  <Truck size={15} />
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700 }}>12 Roues Heavy</span>
                 </div>
-                <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#0f172a' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a' }}>
                   {getTruckCount('12 Roues')}
                 </div>
               </div>
 
-              <div className="clean-card" style={{ padding: '1.15rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ec4899', marginBottom: '0.5rem' }}>
-                  <Truck size={17} />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Semi-Remorque (40t+)</span>
+              <div className="clean-card" style={{ padding: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#ec4899', marginBottom: '0.35rem' }}>
+                  <Truck size={15} />
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700 }}>Semi-Remorque</span>
                 </div>
-                <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#0f172a' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a' }}>
                   {getTruckCount('Semi') || getTruckCount('Remorque') || getTruckCount('14 Roues')}
                 </div>
               </div>
 
-              <div className="clean-card" style={{ padding: '1.15rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#d97706', marginBottom: '0.5rem' }}>
-                  <Droplet size={17} />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Carburant (Litres)</span>
+              <div className="clean-card" style={{ padding: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#d97706', marginBottom: '0.35rem' }}>
+                  <Droplet size={15} />
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700 }}>Carburant (Litres)</span>
                 </div>
-                <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#0f172a' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a' }}>
                   {summary.fuelLitersTotal} L
                 </div>
               </div>
 
-              <div className="clean-card" style={{ padding: '1.15rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#b45309', marginBottom: '0.5rem' }}>
-                  <Receipt size={17} />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Taxes Extractions</span>
+              <div className="clean-card" style={{ padding: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#b45309', marginBottom: '0.35rem' }}>
+                  <Receipt size={15} />
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700 }}>Taxes Extractions</span>
                 </div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a' }}>
+                <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a' }}>
                   {formatGNF(summary.totalTaxesGNF)}
                 </div>
               </div>
-
 
             </div>
           </div>
@@ -442,28 +441,29 @@ export const OwnerDashboardView: React.FC = () => {
           {/* Financial Charts */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 450px), 1fr))',
-            gap: '1.5rem',
-            marginBottom: '2rem'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
+            gap: '1.25rem',
+            marginBottom: '1.75rem',
+            width: '100%'
           }}>
-            <div className="clean-card" style={{ padding: '1.5rem' }}>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.25rem' }}>
-                Cascade Financière & Rentabilité (GNF)
+            <div className="clean-card" style={{ padding: '1.25rem', width: '100%', minWidth: 0, overflow: 'hidden' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.2rem' }}>
+                Cascade Financière &amp; Rentabilité (GNF)
               </h3>
-              <p style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '1.25rem' }}>
+              <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '1rem' }}>
                 Décomposition du Chiffre d'Affaires Brut vers la Marge Nette
               </p>
 
-              <div style={{ width: '100%', height: 260 }}>
-                <ResponsiveContainer>
-                  <BarChart data={waterfallData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
-                    <XAxis dataKey="name" stroke="#64748b" fontSize={11} interval={0} />
-                    <YAxis stroke="#64748b" fontSize={11} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
+              <div style={{ width: '100%', height: 240, minWidth: 0 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={waterfallData} margin={{ top: 10, right: 10, left: -10, bottom: 20 }}>
+                    <XAxis dataKey="name" stroke="#64748b" fontSize={10} interval={0} />
+                    <YAxis stroke="#64748b" fontSize={10} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
                     <Tooltip
                       formatter={(val: number) => formatGNF(Math.abs(val))}
                       contentStyle={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0' }}
                     />
-                    <Bar dataKey="amount" radius={[8, 8, 0, 0]}>
+                    <Bar dataKey="amount" radius={[6, 6, 0, 0]}>
                       {waterfallData.map((entry) => (
                         <Cell key={entry.name} fill={entry.fill} />
                       ))}
@@ -473,31 +473,31 @@ export const OwnerDashboardView: React.FC = () => {
               </div>
             </div>
 
-            <div className="clean-card" style={{ padding: '1.5rem' }}>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.25rem' }}>
+            <div className="clean-card" style={{ padding: '1.25rem', width: '100%', minWidth: 0, overflow: 'hidden' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.2rem' }}>
                 Répartition Volumétrique des Modèles
               </h3>
-              <p style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '1.25rem' }}>
+              <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '1rem' }}>
                 Proportion des types de camions sortis de carrière
               </p>
 
               {pieData.length === 0 ? (
-                <div style={{ height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+                <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>
                   Aucune rotation pour cette date
                 </div>
               ) : (
-                <div style={{ width: '100%', height: 260 }}>
-                  <ResponsiveContainer>
+                <div style={{ width: '100%', height: 240, minWidth: 0 }}>
+                  <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={pieData}
                         dataKey="value"
                         nameKey="name"
                         cx="50%"
-                        cy="50%"
-                        outerRadius={85}
-                        innerRadius={50}
-                        paddingAngle={4}
+                        cy="45%"
+                        outerRadius={75}
+                        innerRadius={42}
+                        paddingAngle={3}
                       >
                         {pieData.map((entry, index) => (
                           <Cell key={entry.name} fill={PIE_PALETTE[index % PIE_PALETTE.length]} />
@@ -509,7 +509,7 @@ export const OwnerDashboardView: React.FC = () => {
                         layout="horizontal" 
                         verticalAlign="bottom" 
                         align="center"
-                        wrapperStyle={{ fontSize: '0.82rem', paddingTop: '15px' }}
+                        wrapperStyle={{ fontSize: '0.75rem', paddingTop: '10px' }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -518,22 +518,22 @@ export const OwnerDashboardView: React.FC = () => {
             </div>
             
             {/* Histogramme temporel */}
-            <div className="clean-card" style={{ padding: '1.5rem', gridColumn: '1 / -1' }}>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.25rem' }}>
+            <div className="clean-card" style={{ padding: '1.25rem', gridColumn: '1 / -1', width: '100%', minWidth: 0, overflow: 'hidden' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.2rem' }}>
                 Évolution Temporelle (Recettes vs Dépenses)
               </h3>
-              <p style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '1.25rem' }}>
+              <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '1rem' }}>
                 Comparaison journalière du Chiffre d'Affaires Brut et des Dépenses Totales (Taxes + OPEX)
               </p>
 
               {summary.timeSeriesData.length === 0 ? (
-                <div style={{ height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+                <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>
                   Aucune donnée temporelle pour cette période
                 </div>
               ) : (
-                <div style={{ width: '100%', height: 300 }}>
-                  <ResponsiveContainer>
-                    <AreaChart data={summary.timeSeriesData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+                <div style={{ width: '100%', height: 260, minWidth: 0 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={summary.timeSeriesData} margin={{ top: 10, right: 10, left: -10, bottom: 20 }}>
                       <defs>
                         <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
@@ -545,28 +545,28 @@ export const OwnerDashboardView: React.FC = () => {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                      <XAxis dataKey="date" stroke="#64748b" fontSize={11} 
+                      <XAxis dataKey="date" stroke="#64748b" fontSize={10} 
                         tickFormatter={(str) => {
                           const date = new Date(str);
                           return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
                         }}
                       />
-                      <YAxis stroke="#64748b" fontSize={11} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
+                      <YAxis stroke="#64748b" fontSize={10} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
                       <Tooltip
                         labelFormatter={(str) => new Date(str).toLocaleDateString('fr-FR')}
                         formatter={(val: number, name: string) => [formatGNF(val), name === 'revenue' ? 'Recettes (CAB)' : 'Dépenses (Total)']}
-                        contentStyle={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
+                        contentStyle={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                       />
                       <Legend 
                         iconType="circle" 
                         layout="horizontal" 
                         verticalAlign="bottom" 
                         align="center"
-                        wrapperStyle={{ fontSize: '0.85rem', paddingTop: '15px' }}
+                        wrapperStyle={{ fontSize: '0.78rem', paddingTop: '10px' }}
                         formatter={(value) => value === 'revenue' ? 'Recettes (CAB)' : 'Dépenses (Total)'}
                       />
-                      <Area type="monotone" name="revenue" dataKey="revenue" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" activeDot={{ r: 6 }} />
-                      <Area type="monotone" name="expenses" dataKey="expenses" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorExp)" activeDot={{ r: 6 }} />
+                      <Area type="monotone" name="revenue" dataKey="revenue" stroke="#10b981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorRev)" activeDot={{ r: 5 }} />
+                      <Area type="monotone" name="expenses" dataKey="expenses" stroke="#ef4444" strokeWidth={2.5} fillOpacity={1} fill="url(#colorExp)" activeDot={{ r: 5 }} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
