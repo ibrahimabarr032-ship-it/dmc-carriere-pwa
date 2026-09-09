@@ -4,6 +4,9 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 const DEFAULT_SUPABASE_URL = 'https://vpttgtalqkowtragjbut.supabase.co';
 const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwdHRndGFscWtvd3RyYWdqYnV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1MzkyMTAsImV4cCI6MjEwNDExNTIxMH0.6JSWlKJbArNQBBJmKpmWobSUMoWUPn86XjV_1KBEFic';
 
+/**
+ * Configuration de connexion au service Supabase.
+ */
 export interface SupabaseConfig {
   version: number;
   url: string;
@@ -15,6 +18,12 @@ export interface SupabaseConfig {
 
 const STORAGE_KEY = 'dmc_supabase_config_v1';
 
+/**
+ * Récupère la configuration Supabase actuelle stockée dans le localStorage,
+ * avec fallback sur les variables d'environnement Vite ou les valeurs par défaut.
+ * 
+ * @returns {SupabaseConfig} La configuration active.
+ */
 export const getSupabaseConfig = (): SupabaseConfig => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -37,6 +46,13 @@ export const getSupabaseConfig = (): SupabaseConfig => {
   };
 };
 
+/**
+ * Sauvegarde la configuration Supabase mise à jour dans le localStorage
+ * et réinitialise l'instance singleton du client Supabase.
+ * 
+ * @param {Partial<SupabaseConfig>} config Les modifications de configuration à appliquer.
+ * @returns {SupabaseConfig} La configuration complète après sauvegarde.
+ */
 export const saveSupabaseConfig = (config: Partial<SupabaseConfig>): SupabaseConfig => {
   const current = getSupabaseConfig();
   const updated: SupabaseConfig = { ...current, ...config, version: 1 };
@@ -48,6 +64,11 @@ export const saveSupabaseConfig = (config: Partial<SupabaseConfig>): SupabaseCon
 
 let clientInstance: SupabaseClient | null = null;
 
+/**
+ * Initialise l'instance du client Supabase à partir de la configuration active.
+ * 
+ * @returns {SupabaseClient | null} L'instance Supabase ou null si la configuration est incomplète.
+ */
 export const initSupabaseClient = (): SupabaseClient | null => {
   const config = getSupabaseConfig();
   if (!config.url || !config.anonKey || config.anonKey.includes('placeholder')) {
@@ -70,6 +91,11 @@ export const initSupabaseClient = (): SupabaseClient | null => {
   }
 };
 
+/**
+ * Récupère l'instance singleton du client Supabase en mémoire ou l'initialise si nécessaire.
+ * 
+ * @returns {SupabaseClient | null} L'instance active du client Supabase.
+ */
 export const getSupabaseClient = (): SupabaseClient | null => {
   if (!clientInstance) {
     return initSupabaseClient();
@@ -77,6 +103,13 @@ export const getSupabaseClient = (): SupabaseClient | null => {
   return clientInstance;
 };
 
+/**
+ * Teste la connectivité avec l'instance Supabase distante à l'aide d'une URL et d'une clé API anonyme.
+ * 
+ * @param {string} url L'URL de l'instance Supabase.
+ * @param {string} key La clé anonyme (anon key) Supabase.
+ * @returns {Promise<{ success: boolean; message: string }>} Le résultat du test de connectivité.
+ */
 export const testSupabaseConnection = async (url: string, key: string): Promise<{ success: boolean; message: string }> => {
   if (!url || !key) {
     return { success: false, message: "L'URL et la clé anonyme Supabase sont obligatoires." };

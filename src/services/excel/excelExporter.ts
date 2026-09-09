@@ -2,6 +2,17 @@ import * as XLSX from 'xlsx';
 import { FinancialSummary } from '../../hooks/useCalculations';
 import { LoadingRecord, ExpenseRecord } from '../../types/domain';
 
+/**
+ * Exporte l'ensemble des données d'exploitation d'une journée dans un classeur Excel multi-onglets :
+ * - Onglet 1 : Synthèse Financière & Bilan (KPIs, ventilation par camion)
+ * - Onglet 2 : Détail exhaustif des Chargements (tickets, prix, taxes, immatriculations)
+ * - Onglet 3 : Détail exhaustif des Dépenses & Carburant (catégories, montants, volumes)
+ * 
+ * @param {string} dateStr La date d'exploitation (format YYYY-MM-DD).
+ * @param {FinancialSummary} summary L'agrégation financière calculée.
+ * @param {LoadingRecord[]} loadings Les chargements enregistrés pour la journée.
+ * @param {ExpenseRecord[]} expenses Les dépenses enregistrées pour la journée.
+ */
 export function exportFinancialDataToExcel(
   dateStr: string,
   summary: FinancialSummary,

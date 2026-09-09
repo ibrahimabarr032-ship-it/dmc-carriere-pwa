@@ -8,12 +8,31 @@ const gnfNumberFormat = new Intl.NumberFormat('fr-GN', {
   maximumFractionDigits: 0
 });
 
+/**
+ * Formate un montant numérique en devise GNF (Franc Guinéen) avec séparateurs de milliers
+ * et conversion des espaces insécables pour compatibilité jsPDF.
+ * 
+ * @param {number} amount Le montant en GNF à formater.
+ * @returns {string} La chaîne formatée (ex: "1 500 000 GNF").
+ */
 export function formatGNF(amount: number): string {
   const formatted = gnfNumberFormat.format(amount);
   // Remplacer les espaces insécables par des espaces normaux pour jsPDF
   return formatted.replace(/[\u202F\u00A0]/g, ' ') + ' GNF';
 }
 
+/**
+ * Génère et déclenche le téléchargement du rapport officiel PDF de la journée d'exploitation.
+ * Comprend l'en-tête officiel DMC, les KPIs financiers, la répartition des camions,
+ * le détail complet des passages et dépenses, la certification de clôture, ainsi que les photos en annexe.
+ * 
+ * @param {string} dateStr La date d'exploitation au format YYYY-MM-DD.
+ * @param {FinancialSummary} summary L'agrégation des données financières de la journée.
+ * @param {LoadingRecord[]} loadings La liste des chargements enregistrés.
+ * @param {ExpenseRecord[]} expenses La liste des dépenses et carburants enregistrés.
+ * @param {UserAccount} currentUser Le compte de l'utilisateur qui génère le rapport.
+ * @param {DailyReportPhoto[]} [photos] Les photos de terrain annexées à la journée.
+ */
 export function generateDailyReportPDF(
   dateStr: string,
   summary: FinancialSummary,

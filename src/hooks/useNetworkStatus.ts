@@ -3,6 +3,13 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../services/db/localDb';
 import { syncAllDataWithSupabase } from '../services/supabase/supabaseSync';
 
+/**
+ * Hook React personnalisé assurant la gestion et l'observation de l'état réseau (en ligne / hors-ligne / simulation),
+ * le décompte en temps réel des enregistrements en attente de synchronisation dans IndexedDB,
+ * ainsi que le déclenchement automatique ou manuel de la synchronisation Supabase.
+ * 
+ * @returns {object} Les propriétés d'état réseau et la fonction `syncNow`.
+ */
 export function useNetworkStatus() {
   const [isRealOnline, setIsRealOnline] = useState<boolean>(
     typeof navigator !== 'undefined' ? navigator.onLine : true

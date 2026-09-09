@@ -3,6 +3,12 @@ import { useCallback } from 'react';
 type AudioCtxCtor = typeof AudioContext;
 let sharedCtx: AudioContext | null = null;
 
+/**
+ * Récupère ou instancie le contexte Web Audio unique partagé pour l'ensemble de l'application,
+ * évitant ainsi l'épuisement des limites de contextes audio des navigateurs.
+ * 
+ * @returns {AudioContext | null} Le contexte audio partagé ou null si non supporté.
+ */
 function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   const Ctor: AudioCtxCtor | undefined =
@@ -22,6 +28,12 @@ function getAudioContext(): AudioContext | null {
   return sharedCtx;
 }
 
+/**
+ * Hook React pour déclencher des retours haptiques (vibration matérielle sur mobile
+ * et feedback sonore discret synthétisé par Web Audio API).
+ * 
+ * @returns {{ triggerHaptic: (pattern?: 'tap' | 'success' | 'warning' | 'error') => void }}
+ */
 export function useHaptic() {
   const triggerHaptic = useCallback((pattern: 'tap' | 'success' | 'warning' | 'error' = 'tap') => {
     // 1. Mobile Device Vibration API

@@ -4,6 +4,9 @@ import { db } from '../services/db/localDb';
 import { syncAllDataWithSupabase } from '../services/supabase/supabaseSync';
 import { UserAccount, UserRole } from '../types/domain';
 
+/**
+ * Interface du contexte d'authentification et gestion de session locale.
+ */
 interface AuthContextType {
   currentUser: UserAccount | null;
   users: UserAccount[];
@@ -17,6 +20,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Fournisseur de contexte d'authentification par code PIN pour l'application DMC Carrière.
+ * Gère l'utilisateur connecté, la persistance locale dans IndexedDB et la synchronisation des comptes.
+ */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(null);
   const [activeRole, setActiveRole] = useState<UserRole>('AGENT_TERRAIN');
@@ -91,6 +98,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
+/**
+ * Hook React personnalisé permettant d'accéder au contexte d'authentification active.
+ * 
+ * @throws {Error} Si invoqué en dehors d'un AuthProvider.
+ * @returns {AuthContextType} Les informations de session et méthodes d'authentification.
+ */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

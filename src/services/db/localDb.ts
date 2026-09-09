@@ -11,6 +11,11 @@ import {
   SyncQueueItem
 } from '../../types/domain';
 
+/**
+ * Base de données locale IndexedDB (via Dexie) pour la PWA DMC Carrière.
+ * Assure le stockage hors-ligne exhaustif des flux de données métier :
+ * chargements, dépenses, clôtures journalières, rapports photos, audit et file de sync.
+ */
 export class DMCLocalDatabase extends Dexie {
   users!: Table<UserAccount, string>;
   truckModels!: Table<TruckModel, string>;
@@ -51,6 +56,12 @@ export class DMCLocalDatabase extends Dexie {
 
 export const db = new DMCLocalDatabase();
 
+/**
+ * Purge l'intégralité des tables de la base de données locale IndexedDB (y compris photos et journaux)
+ * puis recharge la page pour forcer une réinitialisation propre et resynchronisation avec Supabase.
+ * 
+ * @returns {Promise<void>}
+ */
 export async function clearLocalDatabase(): Promise<void> {
   await Promise.all([
     db.users.clear(),

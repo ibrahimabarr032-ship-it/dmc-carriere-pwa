@@ -2,6 +2,9 @@ import { getSupabaseClient, saveSupabaseConfig } from './supabaseClient';
 import { db } from '../db/localDb';
 import { TruckModel, UserAccount } from '../../types/domain';
 
+/**
+ * Statistiques résumées des opérations de synchronisation montantes et descendantes.
+ */
 export interface SyncStats {
   pushedLoadings: number;
   pushedExpenses: number;
@@ -11,6 +14,9 @@ export interface SyncStats {
   pulledUsers: number;
 }
 
+/**
+ * Résultat détaillé d'une opération de synchronisation bidirectionnelle Supabase.
+ */
 export interface SyncResult {
   success: boolean;
   stats: SyncStats;
@@ -22,6 +28,16 @@ export interface SyncResult {
   error?: string;
 }
 
+/**
+ * Exécute la synchronisation bidirectionnelle complète entre la base locale Dexie (IndexedDB)
+ * et la base distante Supabase (PostgreSQL).
+ * 
+ * - Envoie les chargements (loadings), dépenses (expenses) et clôtures (dailyClosures) en attente (`PENDING`).
+ * - Met à jour le catalogue de camions (`truck_models`) et les comptes utilisateurs (`user_accounts`).
+ * - Retourne les identifiants confirmés pour sécuriser le marquage `SYNCED`.
+ * 
+ * @returns {Promise<SyncResult>} Le bilan détaillé de la synchronisation.
+ */
 export const syncAllDataWithSupabase = async (): Promise<SyncResult> => {
   const client = getSupabaseClient();
   const stats: SyncStats = {

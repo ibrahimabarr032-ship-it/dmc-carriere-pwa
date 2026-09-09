@@ -3,6 +3,9 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../services/db/localDb';
 import { LoadingRecord, ExpenseRecord } from '../types/domain';
 
+/**
+ * Structure agrégée des indicateurs financiers et statistiques d'exploitation.
+ */
 export interface FinancialSummary {
   totalTrucks: number;
   grossRevenueGNF: number; // CAB
@@ -39,6 +42,13 @@ export interface FinancialSummary {
   filteredExpenses: ExpenseRecord[];
 }
 
+/**
+ * Hook React personnalisé pour calculer dynamiquement tous les flux financiers et KPIs d'exploitation
+ * en temps réel à partir de la base locale IndexedDB (via requêtes Dexie `useLiveQuery`).
+ * 
+ * @param {string | ((date: string) => boolean)} [dateFilter] Filtre de date optionnel (date exacte YYYY-MM-DD ou prédicat).
+ * @returns {FinancialSummary} Les statistiques et agrégations financières pour la période sélectionnée.
+ */
 export function useCalculations(dateFilter?: string | ((date: string) => boolean)) {
   // Query all loadings and expenses
   const allLoadings = useLiveQuery(() => db.loadings.toArray()) ?? [];
