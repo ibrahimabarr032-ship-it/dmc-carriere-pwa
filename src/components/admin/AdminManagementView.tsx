@@ -374,80 +374,118 @@ export const AdminManagementView: React.FC = () => {
                 key={truck.id}
                 className="clean-card clean-card-hover"
                 style={{
-                  padding: '1.15rem 1.35rem',
+                  padding: '1rem 1.15rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                  borderRadius: 'var(--radius-xl)',
+                  border: truck.isActive ? '1px solid #e2e8f0' : '1px dashed #cbd5e1',
+                  opacity: truck.isActive ? 1 : 0.7
+                }}
+              >
+                {/* Top Row: Icon + Name on left, Price on right */}
+                <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  borderRadius: 'var(--radius-xl)',
-                  gap: '1rem',
-                  border: truck.isActive ? '1px solid #e2e8f0' : '1px dashed #cbd5e1',
-                  opacity: truck.isActive ? 1 : 0.65
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '12px',
-                    backgroundColor: truck.isActive ? '#ecfdf5' : '#f1f5f9',
-                    color: truck.isActive ? '#059669' : '#94a3b8',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <Truck size={24} />
-                  </div>
-
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
-                        {truck.name}
-                      </span>
-                      {!truck.isActive && <span className="badge badge-red">Inactif</span>}
+                  gap: '0.75rem',
+                  flexWrap: 'wrap'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+                    <div style={{
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '10px',
+                      backgroundColor: truck.isActive ? '#ecfdf5' : '#f1f5f9',
+                      color: truck.isActive ? '#059669' : '#94a3b8',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <Truck size={20} />
                     </div>
 
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
+                          {truck.name}
+                        </span>
+                        {!truck.isActive && <span className="badge badge-red">Inactif</span>}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                        {truck.axleCount || 2} essieux • Tarif standard
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#047857' }}>
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#047857' }}>
                       {formatGNF(truck.defaultPriceGNF)}
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Tarif unitaire TTC</div>
+                    <div style={{ fontSize: '0.68rem', color: '#64748b' }}>Tarif unitaire TTC</div>
                   </div>
-
-                  {currentUser?.role !== 'PROPRIETAIRE' && (
-                    <div style={{ display: 'flex', gap: '0.45rem' }}>
-                      <button
-                        onClick={() => handleOpenEditTruck(truck)}
-                        className="btn-outline"
-                        style={{ padding: '0.5rem 0.75rem', fontSize: '0.82rem' }}
-                      >
-                        <Edit2 size={15} />
-                        <span>Modifier</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleToggleTruckActive(truck)}
-                        className="btn-outline"
-                        style={{ padding: '0.5rem 0.75rem', fontSize: '0.82rem' }}
-                      >
-                        {truck.isActive ? 'Désactiver' : 'Activer'}
-                      </button>
-
-                      <button
-                        type="button"
-                        aria-label={`Supprimer le modèle ${truck.name}`}
-                        onClick={() => handleDeleteTruck(truck)}
-                        className="btn-outline"
-                        style={{ padding: '0.5rem 0.75rem', fontSize: '0.82rem', color: '#dc2626', borderColor: '#fecaca' }}
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
-                  )}
                 </div>
+
+                {/* Bottom Row: Actions */}
+                {currentUser?.role !== 'PROPRIETAIRE' && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    gap: '0.4rem',
+                    flexWrap: 'wrap',
+                    paddingTop: '0.65rem',
+                    borderTop: '1px solid #f1f5f9'
+                  }}>
+                    <button
+                      onClick={() => handleOpenEditTruck(truck)}
+                      className="btn-outline"
+                      style={{
+                        padding: '0.4rem 0.75rem',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        backgroundColor: '#f8fafc'
+                      }}
+                    >
+                      <Edit2 size={13} />
+                      <span>Modifier</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleToggleTruckActive(truck)}
+                      className="btn-outline"
+                      style={{
+                        padding: '0.4rem 0.75rem',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        color: truck.isActive ? '#64748b' : '#059669',
+                        backgroundColor: '#f8fafc'
+                      }}
+                    >
+                      {truck.isActive ? 'Désactiver' : 'Activer'}
+                    </button>
+
+                    <button
+                      type="button"
+                      aria-label={`Supprimer le modèle ${truck.name}`}
+                      onClick={() => handleDeleteTruck(truck)}
+                      className="btn-outline"
+                      style={{
+                        padding: '0.4rem 0.6rem',
+                        fontSize: '0.78rem',
+                        color: '#dc2626',
+                        borderColor: '#fecaca',
+                        backgroundColor: '#fef2f2'
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -458,116 +496,100 @@ export const AdminManagementView: React.FC = () => {
       {activeTab === 'users' && (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '2rem',
-          alignItems: 'start'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 310px), 1fr))',
+          gap: '1.5rem',
+          alignItems: 'start',
+          width: '100%'
         }}>
           
           {/* Left Panel: Formulaire Ajouter un Intervenant */}
           {currentUser?.role !== 'PROPRIETAIRE' && (
-            <div className="clean-card" style={{ padding: '1.75rem' }}>
+            <div className="clean-card" style={{ padding: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1.25rem' }}>
                 <UserPlus size={20} color="#059669" />
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
-                  Ajouter un intervenant
+                <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
+                  Ajouter un Collaborateur
                 </h2>
               </div>
 
               {userCreatedMsg && (
                 <div style={{
-                  backgroundColor: '#ecfdf5',
-                  color: '#047857',
-                  border: '1px solid #a7f3d0',
-                  padding: '0.75rem 1rem',
-                  borderRadius: 'var(--radius-md)',
-                  fontSize: '0.85rem',
-                  fontWeight: 700,
-                  marginBottom: '1.25rem'
+                  padding: '0.75rem 1rem', backgroundColor: '#ecfdf5',
+                  border: '1px solid #a7f3d0', borderRadius: '12px',
+                  color: '#065f46', fontSize: '0.82rem', fontWeight: 700,
+                  marginBottom: '1rem'
                 }}>
                   {userCreatedMsg}
                 </div>
               )}
 
-              <form onSubmit={handleCreateUserAccount}>
-                <div style={{ marginBottom: '1.25rem' }}>
-                  <label htmlFor="newUserName" style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '0.4rem' }}>
-                    Identifiant (Nom & Prénom)
+              <form onSubmit={handleCreateUserAccount} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label htmlFor="newUserName" style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#334155', marginBottom: '0.35rem' }}>
+                    NOM &amp; PRÉNOM DU COLLABORATEUR *
                   </label>
                   <input
                     id="newUserName"
                     type="text"
-                    placeholder="Ex: Mamadou Diallo"
+                    required
+                    placeholder="Ex : Bella, Mamadou Diallo"
                     value={newUserName}
                     onChange={(e) => setNewUserName(e.target.value)}
                     className="input-field"
-                    required
+                    style={{ fontSize: '0.9rem' }}
                   />
                 </div>
 
-                {/* Rôles Métier */}
-                <div style={{ marginBottom: '1.25rem' }}>
-                  <span style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '0.5rem' }}>
-                    Rôle & Permissions Métier
-                  </span>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {[
-                      { role: 'AGENT_TERRAIN' as UserRole, label: 'Pointeur Chantier (Saisie 2 clics)', color: '#059669' },
-                      { role: 'PROPRIETAIRE' as UserRole, label: 'Propriétaire / Direction (Consultation & Rapports)', color: '#0284c7' },
-                      { role: 'ADMINISTRATEUR' as UserRole, label: 'Administrateur Principal (Plein Pouvoir)', color: '#7c3aed' }
-                    ].map(r => (
-                      <div
-                        key={r.role}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.65rem',
-                          padding: '0.75rem 1rem',
-                          borderRadius: 'var(--radius-md)',
-                          border: newUserRole === r.role ? `2px solid ${r.color}` : '1px solid #e2e8f0',
-                          backgroundColor: newUserRole === r.role ? '#f8fafc' : '#ffffff',
-                          fontSize: '0.88rem',
-                          fontWeight: newUserRole === r.role ? 700 : 500
-                        }}
-                      >
-                        <input
-                          id={`role-${r.role}`}
-                          type="radio"
-                          name="userRole"
-                          checked={newUserRole === r.role}
-                          onChange={() => setNewUserRole(r.role)}
-                          style={{ accentColor: r.color }}
-                        />
-                        <label htmlFor={`role-${r.role}`} style={{ color: '#334155', cursor: 'pointer' }}>{r.label}</label>
-                      </div>
-                    ))}
-                  </div>
+                <div>
+                  <label htmlFor="newUserRole" style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#334155', marginBottom: '0.35rem' }}>
+                    RÔLE D'ACCÈS *
+                  </label>
+                  <select
+                    id="newUserRole"
+                    value={newUserRole}
+                    onChange={(e) => setNewUserRole(e.target.value as UserRole)}
+                    className="input-field"
+                    style={{ fontSize: '0.9rem', cursor: 'pointer' }}
+                  >
+                    <option value="AGENT_TERRAIN">Pointeur Terrain (Saisie &amp; Carburant)</option>
+                    <option value="ADMINISTRATEUR">Administrateur (Gestion &amp; Tarifs)</option>
+                    <option value="PROPRIETAIRE">Propriétaire / DG (Lecture Seule &amp; Rapports)</option>
+                  </select>
                 </div>
 
-
+                <div style={{
+                  padding: '0.75rem 0.9rem',
+                  backgroundColor: '#f8fafc',
+                  border: '1px dashed #cbd5e1',
+                  borderRadius: '10px',
+                  fontSize: '0.75rem',
+                  color: '#64748b'
+                }}>
+                  🔒 Le code PIN temporaire sera <strong>0000</strong>. L'utilisateur devra obligatoirement le personnaliser lors de sa 1ère connexion.
+                </div>
 
                 <button
                   type="submit"
                   className="btn-primary"
                   style={{
-                    width: '100%',
-                    padding: '0.9rem',
-                    backgroundColor: '#10b981',
-                    borderRadius: 'var(--radius-md)'
+                    backgroundColor: '#059669',
+                    padding: '0.75rem',
+                    fontSize: '0.92rem',
+                    borderRadius: 'var(--radius-lg)',
+                    marginTop: '0.25rem'
                   }}
                 >
-                  <span>Créer le compte</span>
-                  <ChevronRight size={18} />
+                  <UserPlus size={16} />
+                  <span>Créer le Compte</span>
                 </button>
               </form>
             </div>
           )}
 
           {/* Right Panel: Liste des Collaborateurs */}
-          <div className="clean-card" style={{ padding: '1.75rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1.25rem' }}>
-              <Users size={20} color="#059669" />
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
+          <div className="clean-card" style={{ padding: '1.25rem' }}>
+            <div style={{ marginBottom: '1.25rem' }}>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
                 Personnel Enregistré ({allUsers.length})
               </h2>
             </div>
@@ -578,87 +600,103 @@ export const AdminManagementView: React.FC = () => {
                   key={user.id}
                   className="clean-card"
                   style={{
-                    padding: '0.9rem 1.15rem',
+                    padding: '0.9rem 1.1rem',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
+                    flexDirection: 'column',
+                    gap: '0.75rem',
                     borderRadius: 'var(--radius-lg)'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{
-                      width: '38px',
-                      height: '38px',
-                      borderRadius: '50%',
-                      backgroundColor: '#dcfce7',
-                      color: '#15803d',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 900
-                    }}>
-                      {user.fullName.substring(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
-                        {user.fullName}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '0.75rem',
+                    flexWrap: 'wrap'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+                      <div style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        backgroundColor: user.role === 'ADMINISTRATEUR' ? '#eff6ff' : user.role === 'PROPRIETAIRE' ? '#f5f3ff' : '#ecfdf5',
+                        color: user.role === 'ADMINISTRATEUR' ? '#2563eb' : user.role === 'PROPRIETAIRE' ? '#7c3aed' : '#059669',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 900,
+                        fontSize: '0.8rem',
+                        flexShrink: 0
+                      }}>
+                        {user.fullName.substring(0, 2).toUpperCase()}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <span>PIN : {user.pinCode === '0000' ? <strong style={{ color: '#d97706' }}>0000 (Initial)</strong> : '••••'}</span>
-                        <span>•</span>
-                        <span>{user.phone || 'Non renseigné'}</span>
+                      <div>
+                        <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+                          {user.fullName}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                          <span>PIN : {user.pinCode === '0000' ? <strong style={{ color: '#d97706' }}>0000 (Initial)</strong> : '••••'}</span>
+                          <span>•</span>
+                          <span>{user.phone || 'Non renseigné'}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                     <span className={`badge ${user.role === 'ADMINISTRATEUR' ? 'badge-purple' : user.role === 'PROPRIETAIRE' ? 'badge-blue' : 'badge-mint'}`}>
                       {user.role}
                     </span>
+                  </div>
 
-                    {currentUser?.role !== 'PROPRIETAIRE' && (
-                      <div style={{ display: 'flex', gap: '0.35rem' }}>
+                  {currentUser?.role !== 'PROPRIETAIRE' && (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      gap: '0.35rem',
+                      flexWrap: 'wrap',
+                      paddingTop: '0.5rem',
+                      borderTop: '1px solid #f1f5f9'
+                    }}>
+                      <button
+                        type="button"
+                        title="Réinitialiser le code PIN à 0000"
+                        onClick={() => handleResetUserPin(user)}
+                        className="btn-outline"
+                        style={{
+                          padding: '0.35rem 0.6rem',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                          color: '#0284c7',
+                          borderColor: '#bae6fd',
+                          backgroundColor: '#f0f9ff'
+                        }}
+                      >
+                        <KeyRound size={12} />
+                        <span>Réinit. PIN (0000)</span>
+                      </button>
+
+                      {currentUser?.id !== user.id && (
                         <button
                           type="button"
-                          title="Réinitialiser le code PIN à 0000"
-                          onClick={() => handleResetUserPin(user)}
+                          aria-label={`Supprimer ${user.fullName}`}
+                          title="Supprimer ce collaborateur"
+                          onClick={() => handleDeleteUser(user)}
                           className="btn-outline"
                           style={{
-                            padding: '0.4rem 0.65rem',
-                            fontSize: '0.78rem',
-                            fontWeight: 700,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.3rem',
-                            color: '#0284c7',
-                            borderColor: '#bae6fd',
-                            backgroundColor: '#f0f9ff'
+                            padding: '0.35rem 0.55rem',
+                            color: '#dc2626',
+                            borderColor: '#fecaca',
+                            backgroundColor: '#fef2f2'
                           }}
                         >
-                          <KeyRound size={13} />
-                          <span>Réinit. PIN (0000)</span>
+                          <Trash2 size={13} />
                         </button>
-
-                        {currentUser?.id !== user.id && (
-                          <button
-                            type="button"
-                            aria-label={`Supprimer ${user.fullName}`}
-                            title="Supprimer ce collaborateur"
-                            onClick={() => handleDeleteUser(user)}
-                            className="btn-outline"
-                            style={{
-                              padding: '0.4rem 0.55rem',
-                              color: '#dc2626',
-                              borderColor: '#fecaca',
-                              backgroundColor: '#fef2f2'
-                            }}
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
